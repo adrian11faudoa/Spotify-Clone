@@ -1,3 +1,2071 @@
+# Spotify-Style Music Streaming Platform — Architecture Prompt
+
+## ROLE
+
+Act as a Principal Software Architect and senior distributed-systems architecture team designing an original, production-grade global music streaming platform.
+
+Produce the detailed technical architecture for the system described below.
+
+This is an **architecture-only task**.
+
+Do not implement application source code.
+
+Do not generate production implementation files.
+
+Do not write pseudo-code as a substitute for architecture.
+
+The architecture must be sufficiently detailed that backend, mobile, infrastructure, media-processing, search, analytics, and QA engineers can implement the system consistently from the repository and this architectural specification.
+
+The actual repository is the source of truth for any existing implementation.
+
+---
+
+# 1. PROJECT
+
+Design an original music streaming platform comparable in capability and scale to a modern Spotify-style service.
+
+The system must support, as appropriate:
+
+* user accounts
+* authentication
+* profiles
+* devices and sessions
+* artists
+* albums
+* tracks
+* genres
+* music catalog
+* playlists
+* playlist collaboration
+* playlist visibility
+* liked/saved music
+* follows
+* music library
+* search
+* discovery
+* recommendations
+* playback
+* queues
+* playback sessions
+* playback history
+* recently played music
+* audio streaming
+* adaptive audio quality
+* media processing
+* artwork
+* subscriptions
+* entitlements
+* analytics
+* notifications
+* administration
+* content management
+* moderation
+* operational tooling
+
+The product must be original.
+
+Do not reproduce Spotify's proprietary implementation, internal APIs, private architecture, source code, or copyrighted assets.
+
+---
+
+# 2. REQUIRED TECHNOLOGY DIRECTION
+
+Design around this technology stack unless repository inspection demonstrates an existing compatible implementation that should be preserved.
+
+## Mobile
+
+* React Native
+* Expo
+* TypeScript
+* React Navigation
+* Zustand
+* TanStack Query
+
+## Backend
+
+* Node.js
+* NestJS
+* TypeScript
+
+## Database
+
+* PostgreSQL
+* Prisma
+
+## Cache / Ephemeral State
+
+* Redis / compatible Redis implementation
+
+## Search
+
+* Elasticsearch or OpenSearch
+
+## Object Storage / CDN
+
+* AWS S3
+* AWS CloudFront
+
+## Audio Processing
+
+* FFmpeg
+* background processing
+* adaptive streaming
+* HLS where appropriate
+
+## Background Jobs
+
+* BullMQ
+* Redis
+
+## Event Streaming
+
+* Kafka or Redpanda where justified
+
+## API
+
+* REST
+* OpenAPI / Swagger
+
+## Infrastructure
+
+* AWS
+* Docker
+* Terraform or OpenTofu
+* Kubernetes/EKS where justified
+
+## Observability
+
+Where appropriate:
+
+* OpenTelemetry
+* Prometheus
+* Grafana
+* Loki
+* Tempo
+
+The architecture must justify significant infrastructure choices instead of adding technologies merely because they are listed.
+
+---
+
+# 3. REPOSITORY-FIRST ARCHITECTURE AUDIT
+
+Before defining architecture, inspect the repository.
+
+Determine:
+
+* repository structure
+* applications
+* packages
+* services
+* modules
+* existing database schema
+* existing migrations
+* API structure
+* authentication
+* media handling
+* storage
+* queues
+* event infrastructure
+* search
+* mobile architecture
+* tests
+* CI/CD
+* Docker configuration
+* infrastructure
+* environment configuration
+* observability
+* documentation
+
+Identify:
+
+* implemented architecture
+* partially implemented architecture
+* conflicting architecture
+* reusable components
+* technical debt
+* architectural risks
+
+Do not assume an empty repository.
+
+Do not discard compatible existing architecture.
+
+When the repository already contains implementation decisions, explicitly distinguish:
+
+1. Existing authoritative implementation
+2. Architecture that should be preserved
+3. Architecture that should be migrated
+4. Architecture that should not be duplicated
+
+---
+
+# 4. ARCHITECTURAL PRINCIPLES
+
+Establish these principles:
+
+* PostgreSQL is authoritative for durable transactional business state.
+* Search is a derived projection.
+* Redis is not the authoritative store for critical durable data.
+* Object storage is authoritative for media objects.
+* CDN delivery is separate from media ownership.
+* Background processing must be asynchronous where appropriate.
+* External providers must be isolated behind explicit boundaries.
+* API authorization is server-side.
+* Sensitive operations are auditable.
+* Distributed operations are idempotent where necessary.
+* Event consumers tolerate duplicate delivery.
+* Critical operations are transactionally safe.
+* Noncritical dependencies must not unnecessarily block critical workflows.
+* Privacy is enforced across every storage and processing layer.
+* Media uploaded by users or content operators is untrusted.
+* Client applications are never authoritative for security-sensitive business rules.
+
+---
+
+# 5. SYSTEM CONTEXT
+
+Define the complete system context.
+
+Identify:
+
+* mobile application
+* optional web/public surface
+* API
+* authentication
+* PostgreSQL
+* Redis
+* search
+* object storage
+* CDN
+* media-processing workers
+* BullMQ
+* Kafka/Redpanda if justified
+* analytics pipeline
+* recommendation systems
+* notification providers
+* payment provider
+* monitoring infrastructure
+* administration tools
+* content-management workflows
+* external identity/provider boundaries where appropriate
+
+For every external dependency define:
+
+* purpose
+* trust boundary
+* authentication
+* failure behavior
+* timeout strategy
+* retry strategy
+* data exchanged
+* privacy implications
+* observability
+
+---
+
+# 6. BOUNDED CONTEXTS
+
+Define explicit domain boundaries.
+
+At minimum evaluate:
+
+## Identity
+
+Responsibilities:
+
+* users
+* credentials
+* sessions
+* devices
+* authentication
+* account security
+
+## User / Profile
+
+Responsibilities:
+
+* profile
+* preferences
+* account settings
+* user state
+
+## Catalog
+
+Responsibilities:
+
+* artists
+* albums
+* tracks
+* genres
+* releases
+* metadata
+* availability
+* content status
+
+## Library
+
+Responsibilities:
+
+* liked tracks
+* saved albums
+* saved playlists
+* follows
+* user collections
+
+## Playlist
+
+Responsibilities:
+
+* playlist ownership
+* playlist items
+* ordering
+* visibility
+* collaboration
+* playlist followers
+
+## Playback
+
+Responsibilities:
+
+* playback sessions
+* playback state
+* queue
+* current track
+* device coordination
+* playback history
+
+## Media
+
+Responsibilities:
+
+* source audio
+* audio validation
+* transcoding
+* HLS generation
+* artwork
+* manifests
+* media lifecycle
+
+## Search
+
+Responsibilities:
+
+* indexing
+* querying
+* suggestions
+* ranking
+* filtering
+
+## Recommendation
+
+Responsibilities:
+
+* discovery
+* personalized recommendations
+* related music
+* recommendation candidates
+* ranking
+
+## Subscription
+
+Responsibilities:
+
+* plans
+* subscriptions
+* entitlements
+* billing state
+
+## Analytics
+
+Responsibilities:
+
+* playback events
+* engagement events
+* aggregation
+* analytical projections
+
+## Notification
+
+Responsibilities:
+
+* in-app notifications
+* push delivery
+* notification preferences
+* delivery attempts
+
+## Administration
+
+Responsibilities:
+
+* user administration
+* content management
+* moderation
+* media operations
+* operational controls
+* auditing
+
+Define ownership and communication rules between these contexts.
+
+---
+
+# 7. SOURCE-OF-TRUTH MATRIX
+
+Create an explicit source-of-truth matrix.
+
+At minimum cover:
+
+| Data             | Authoritative Source                                   | Derived Consumers               |
+| ---------------- | ------------------------------------------------------ | ------------------------------- |
+| User             | PostgreSQL                                             | cache/search/analytics          |
+| Credentials      | PostgreSQL + secure secret handling                    | authentication                  |
+| Sessions         | PostgreSQL and/or controlled session infrastructure    | Redis                           |
+| Artist           | PostgreSQL                                             | search/cache/analytics          |
+| Album            | PostgreSQL                                             | search/cache/analytics          |
+| Track metadata   | PostgreSQL                                             | search/cache/analytics          |
+| Audio source     | S3                                                     | processing/CDN                  |
+| Transcoded audio | S3                                                     | CloudFront                      |
+| Playlist         | PostgreSQL                                             | cache/search/analytics          |
+| Playlist items   | PostgreSQL                                             | cache/search                    |
+| Likes            | PostgreSQL                                             | cache/recommendations/analytics |
+| Playback history | PostgreSQL and/or dedicated durable event architecture | recommendations/analytics       |
+| Search documents | Search engine                                          | none                            |
+| Recommendations  | Recommendation pipeline                                | client cache                    |
+| Subscription     | PostgreSQL + payment provider boundary                 | entitlement cache               |
+| Notifications    | PostgreSQL                                             | push provider                   |
+| Analytics events | event/analytics pipeline                               | dashboards/recommendations      |
+
+Adjust this according to actual architecture.
+
+Do not create conflicting authorities.
+
+---
+
+# 8. DOMAIN MODEL
+
+Define conceptual entities and their responsibilities.
+
+At minimum evaluate:
+
+### Identity
+
+* User
+* Credential
+* Session
+* Device
+* UserRole
+* Permission
+
+### User
+
+* UserProfile
+* UserPreference
+* UserPrivacySetting
+
+### Catalog
+
+* Artist
+* ArtistMember where appropriate
+* Album
+* Track
+* TrackArtist
+* AlbumArtist
+* Genre
+* TrackGenre
+* Release
+* ContentAvailability
+
+### Media
+
+* MediaAsset
+* AudioSource
+* AudioVariant
+* MediaProcessingJob
+* StreamingManifest
+* ArtworkAsset
+
+### Playlist
+
+* Playlist
+* PlaylistItem
+* PlaylistCollaborator
+* PlaylistFollower
+
+### Library
+
+* SavedTrack
+* SavedAlbum
+* SavedPlaylist
+* Follow
+
+### Playback
+
+* PlaybackSession
+* PlaybackState
+* QueueItem
+* PlaybackEvent
+* PlaybackHistory
+
+### Subscription
+
+* SubscriptionPlan
+* Subscription
+* Entitlement
+* PaymentCustomer
+* BillingEvent
+
+### Recommendation
+
+* RecommendationCandidate
+* RecommendationFeed
+* RecommendationSignal
+
+### Notification
+
+* Notification
+* NotificationPreference
+* DevicePushToken
+* NotificationDeliveryAttempt
+
+### Administration
+
+* AuditEvent
+* ModerationCase
+* ContentReport
+
+Define:
+
+* ownership
+* lifecycle
+* relationships
+* aggregate boundaries
+* invariants
+* mutability
+* deletion behavior
+
+Do not over-normalize or create entities without a clear responsibility.
+
+---
+
+# 9. CATALOG ARCHITECTURE
+
+Define the catalog hierarchy.
+
+Clearly distinguish:
+
+* artist
+* album
+* track
+* release
+* recording where useful
+* genre
+* artwork
+* audio asset
+
+Define how tracks relate to:
+
+* artists
+* featured artists
+* albums
+* releases
+* genres
+
+Support appropriate music structures such as:
+
+* albums
+* singles
+* EPs
+* compilations
+* multiple artists
+* featured artists
+* explicit-content flags
+* release dates
+* track numbers
+* disc numbers
+* duration
+* ISRC or equivalent identifiers where legitimately available
+
+Define catalog lifecycle:
+
+* draft
+* processing
+* pending review
+* published
+* hidden
+* archived
+* removed
+
+Use states appropriate to the actual product.
+
+---
+
+# 10. ARTIST ARCHITECTURE
+
+Define:
+
+* artist profiles
+* display names
+* biographies
+* artwork
+* genres
+* releases
+* relationships
+* followers
+* verification/status
+* content-management permissions
+
+Define how artist accounts differ from ordinary users.
+
+Prevent unauthorized users from modifying artist content.
+
+---
+
+# 11. ALBUM AND TRACK ARCHITECTURE
+
+Define:
+
+* album metadata
+* track metadata
+* ordering
+* multiple discs
+* explicit flags
+* duration
+* availability
+* artwork
+* artists
+* featured artists
+* release information
+
+Determine how track availability interacts with:
+
+* subscription
+* geographic restrictions if implemented
+* content status
+* media processing
+* takedowns
+* catalog lifecycle
+
+---
+
+# 12. PLAYLIST ARCHITECTURE
+
+Define:
+
+* playlist ownership
+* public/private/unlisted visibility
+* playlist metadata
+* playlist ordering
+* playlist item identity
+* collaborative editing
+* collaborators
+* follower relationships
+
+Playlist operations must handle concurrency.
+
+Consider:
+
+* concurrent inserts
+* deletes
+* reordering
+* duplicate tracks
+* stale clients
+* optimistic updates
+* race conditions
+
+Define an ordering strategy that scales.
+
+Prevent unauthorized modification.
+
+---
+
+# 13. LIBRARY ARCHITECTURE
+
+Define:
+
+* liked tracks
+* saved albums
+* saved playlists
+* followed artists
+* followed playlists
+
+Define:
+
+* uniqueness
+* idempotent mutation
+* pagination
+* synchronization
+* cache invalidation
+* privacy
+
+A repeated like/unlike request must not corrupt state.
+
+---
+
+# 14. PLAYBACK ARCHITECTURE
+
+Define the complete playback model.
+
+Distinguish:
+
+* playback intent
+* playback authorization
+* playback session
+* playback state
+* media authorization
+* playback progress
+* playback completion
+* playback history
+* analytics event
+
+Define:
+
+* player session
+* device
+* current track
+* queue
+* position
+* duration
+* playback state
+* playback start time
+* last heartbeat/progress
+* quality/variant where appropriate
+
+Support multiple devices while preventing unintended state corruption.
+
+Define whether and how users can control playback across devices.
+
+---
+
+# 15. QUEUE ARCHITECTURE
+
+Define:
+
+* queue ownership
+* queue ordering
+* queue items
+* insertion
+* deletion
+* reordering
+* persistence
+* synchronization across devices
+
+Handle concurrent modifications safely.
+
+Define whether the queue is:
+
+* durable
+* session-scoped
+* device-scoped
+* user-scoped
+
+Do not store more data durably than necessary.
+
+---
+
+# 16. AUDIO MEDIA ARCHITECTURE
+
+Design the complete audio lifecycle:
+
+1. Source upload
+2. Validation
+3. Metadata extraction
+4. Security inspection
+5. Processing
+6. Normalization where appropriate
+7. Transcoding
+8. Quality variants
+9. Segmentation
+10. Manifest generation
+11. Storage
+12. CDN publication
+13. Playback authorization
+14. Lifecycle management
+
+Define:
+
+* source object keys
+* derived object keys
+* processing states
+* retries
+* idempotency
+* cleanup
+* versioning
+* deletion
+
+Treat uploaded media as untrusted.
+
+Do not permit unsafe shell command construction.
+
+---
+
+# 17. ADAPTIVE STREAMING
+
+Define how HLS or another justified streaming protocol is used.
+
+Specify:
+
+* master manifest
+* media playlists
+* segments
+* audio variants
+* bitrate strategy
+* sample rate/channel considerations
+* codec strategy
+* segment duration
+* CDN caching
+* access control
+* expiration
+* playback authorization
+
+Explain how clients obtain authorized streaming access.
+
+Do not expose private S3 credentials.
+
+Determine whether manifests and segments are:
+
+* public
+* signed
+* token-authorized
+* session-authorized
+
+Choose an approach appropriate to the threat model.
+
+---
+
+# 18. ARTWORK AND IMAGE MEDIA
+
+Define:
+
+* upload
+* validation
+* resizing
+* thumbnails
+* format variants
+* storage
+* CDN
+* cache strategy
+* ownership
+* deletion
+* moderation
+
+Support appropriate artwork sizes for:
+
+* mobile
+* high-density displays
+* playlists
+* albums
+* artists
+* search
+* recommendations
+
+---
+
+# 19. MEDIA PROCESSING JOB ARCHITECTURE
+
+Define BullMQ jobs for operations such as:
+
+* audio processing
+* transcoding
+* waveform generation
+* artwork processing
+* metadata extraction
+* media cleanup
+* search indexing
+
+For each job specify:
+
+* job name
+* input
+* output
+* idempotency key
+* retries
+* timeout
+* backoff
+* concurrency
+* failure behavior
+* DLQ behavior
+* observability
+* cancellation/recovery
+
+Avoid duplicate processing after worker crashes.
+
+---
+
+# 20. SEARCH ARCHITECTURE
+
+Define the search projection.
+
+Search should support:
+
+* tracks
+* artists
+* albums
+* playlists
+* genres
+* other legitimately searchable public entities
+
+Define:
+
+* document structures
+* mappings
+* analyzers
+* aliases
+* index versions
+* reindexing
+* incremental updates
+* event-driven synchronization
+* reconciliation
+
+Search must not become authoritative for transactional catalog state.
+
+Define:
+
+* prefix search
+* typo tolerance
+* relevance
+* exact identifiers
+* filtering
+* pagination
+* suggestions
+* ranking
+
+Prevent:
+
+* unrestricted DSL
+* query abuse
+* excessive resource consumption
+* private-data leakage
+
+---
+
+# 21. RECOMMENDATION ARCHITECTURE
+
+Design a practical recommendation architecture.
+
+Potential signals:
+
+* likes
+* follows
+* listening history
+* completion rate
+* skips
+* repeats
+* search activity
+* playlist additions
+* artist affinity
+* genre affinity
+
+Define:
+
+* event collection
+* candidate generation
+* feature generation
+* ranking
+* personalization
+* freshness
+* fallback recommendations
+
+Provide deterministic fallback behavior when personalization is unavailable.
+
+Recommendations must not block core playback.
+
+Do not claim machine-learning functionality unless an actual implementable pipeline is defined.
+
+---
+
+# 22. ANALYTICS ARCHITECTURE
+
+Define event categories including:
+
+* playback started
+* playback progress
+* playback completed
+* playback skipped
+* track liked
+* track unliked
+* playlist created
+* playlist edited
+* playlist followed
+* artist followed
+* search performed
+* recommendation selected
+
+Define an event envelope containing appropriate:
+
+* event ID
+* event type
+* version
+* timestamp
+* user ID where permitted
+* session ID
+* device ID where appropriate
+* entity ID
+* correlation ID
+* trace context
+* safe metadata
+
+Define:
+
+* ingestion
+* validation
+* deduplication
+* retention
+* aggregation
+* privacy
+* downstream consumers
+
+Avoid logging unnecessary private information.
+
+---
+
+# 23. EVENT-DRIVEN ARCHITECTURE
+
+Where Kafka/Redpanda is justified, define:
+
+* topics
+* partitions
+* keys
+* ordering guarantees
+* event schemas
+* versions
+* retention
+* replay
+* consumer groups
+* retries
+* dead-letter handling
+
+Use transactional outbox where database state and events must remain consistent.
+
+Consumers must be idempotent.
+
+Design for:
+
+* duplicate events
+* delayed events
+* out-of-order events
+* consumer restarts
+* replay
+* schema evolution
+
+---
+
+# 24. REDIS ARCHITECTURE
+
+Create a Redis responsibility matrix.
+
+Potential uses:
+
+* API cache
+* playback ephemeral state
+* rate limits
+* session coordination
+* recommendation cache
+* search suggestion cache
+* queue support
+* BullMQ
+* distributed locks only where genuinely necessary
+
+For each important keyspace define:
+
+* key format
+* value
+* TTL
+* owner
+* invalidation
+* stale behavior
+* failure behavior
+
+Do not use Redis as the sole authoritative store for:
+
+* users
+* subscriptions
+* playlists
+* likes
+* catalog
+* orders/billing state
+* other critical durable state
+
+---
+
+# 25. SUBSCRIPTION ARCHITECTURE
+
+If premium subscriptions are included, define:
+
+* plans
+* pricing
+* currencies
+* subscription lifecycle
+* entitlement calculation
+* billing state
+* provider boundary
+* webhook processing
+* reconciliation
+* cancellation
+* expiration
+* grace periods where appropriate
+
+Define states such as:
+
+* ACTIVE
+* TRIALING
+* PAST_DUE
+* CANCELLED
+* EXPIRED
+* PAUSED
+
+Use states appropriate to the selected billing model.
+
+The client must never be authoritative for entitlement.
+
+---
+
+# 26. PAYMENT ARCHITECTURE
+
+If Stripe or another provider is used:
+
+Define:
+
+* customer mapping
+* subscription mapping
+* payment boundary
+* webhook endpoint
+* signature validation
+* durable webhook event storage
+* provider event deduplication
+* idempotency
+* reconciliation
+* failure recovery
+
+Never store card numbers or CVV.
+
+Never trust client payment status.
+
+Never invent provider behavior.
+
+---
+
+# 27. NOTIFICATION ARCHITECTURE
+
+Define:
+
+* notification record
+* notification types
+* preferences
+* recipient resolution
+* device push tokens
+* delivery attempts
+* provider state
+* retries
+* deduplication
+
+Separate:
+
+* transactional notifications
+* security notifications
+* product notifications
+* optional marketing notifications
+
+Never expose push credentials or device tokens unnecessarily.
+
+---
+
+# 28. AUTHENTICATION AND AUTHORIZATION
+
+Define:
+
+* registration
+* login
+* logout
+* session management
+* token/session renewal
+* password recovery
+* email verification
+* device management
+* account security
+
+Define authorization for:
+
+* ordinary users
+* artists
+* artist managers
+* playlist owners
+* playlist collaborators
+* moderators
+* administrators
+* media operators
+
+Create a permission matrix.
+
+Prevent:
+
+* IDOR
+* privilege escalation
+* ownership bypass
+* role manipulation
+* unauthorized artist-content modification
+
+---
+
+# 29. API ARCHITECTURE
+
+Define versioned REST APIs.
+
+At minimum evaluate API groups for:
+
+* authentication
+* users
+* profiles
+* artists
+* albums
+* tracks
+* genres
+* playlists
+* library
+* playback
+* queue
+* history
+* search
+* recommendations
+* subscriptions
+* notifications
+* administration
+
+For each API family define:
+
+* ownership
+* authentication
+* authorization
+* request DTO
+* response DTO
+* validation
+* pagination
+* filtering
+* sorting
+* error model
+* idempotency
+* rate limiting
+* caching
+* observability
+
+Do not expose internal database models directly.
+
+---
+
+# 30. PLAYBACK API CONTRACT
+
+Define secure playback APIs.
+
+Potential flow:
+
+1. Client requests playback authorization.
+2. Backend validates:
+
+   * authentication
+   * entitlement
+   * track availability
+   * catalog status
+   * device/session state
+3. Backend returns an appropriate short-lived media authorization mechanism.
+4. Client obtains streaming media through the CDN.
+5. Client reports playback telemetry through controlled APIs.
+6. Backend records authoritative playback history/events.
+
+Do not return permanent unrestricted media URLs for protected content.
+
+---
+
+# 31. DATABASE ARCHITECTURE
+
+Define the conceptual PostgreSQL schema.
+
+For every major entity specify:
+
+* primary key
+* important fields
+* foreign keys
+* unique constraints
+* indexes
+* lifecycle state
+* ownership
+* timestamps
+* soft deletion where justified
+* retention behavior
+
+Define:
+
+* transaction boundaries
+* isolation considerations
+* concurrency controls
+* migration strategy
+
+Important constraints should be enforced by the database whenever practical.
+
+---
+
+# 32. CONCURRENCY AND IDEMPOTENCY
+
+Explicitly design concurrency for:
+
+* playlist edits
+* likes
+* follows
+* queue operations
+* playback history
+* subscription webhooks
+* media-processing jobs
+* search indexing
+* notification delivery
+* recommendation events
+
+For every mutation determine:
+
+* idempotency requirement
+* unique constraint
+* transaction
+* locking strategy
+* retry behavior
+* duplicate handling
+
+---
+
+# 33. PRIVACY ARCHITECTURE
+
+Define privacy controls across:
+
+* PostgreSQL
+* Redis
+* search
+* events
+* analytics
+* recommendations
+* notifications
+* logs
+* media
+* backups
+
+Separate:
+
+* public catalog information
+* private user information
+* private playlists
+* listening history
+* personalization signals
+* operational information
+
+Do not allow private data to enter public search indexes.
+
+---
+
+# 34. SECURITY THREAT MODEL
+
+Create a threat model covering:
+
+* authentication
+* authorization
+* account takeover
+* token theft
+* IDOR
+* API abuse
+* media access
+* malicious uploads
+* FFmpeg execution
+* CDN access
+* search abuse
+* playlist collaboration abuse
+* WebSocket abuse if used
+* push notification abuse
+* provider webhook spoofing
+* subscription manipulation
+* event injection
+* analytics poisoning
+* secret leakage
+* SSRF
+* injection
+* rate-limit bypass
+
+For each threat define:
+
+* attack surface
+* mitigation
+* detection
+* recovery
+
+---
+
+# 35. OBSERVABILITY ARCHITECTURE
+
+Define:
+
+## Logs
+
+* structured
+* correlation-aware
+* privacy-safe
+
+## Metrics
+
+Include:
+
+* API latency
+* API errors
+* authentication failures
+* playback authorization failures
+* playback starts
+* playback failures
+* streaming authorization latency
+* queue latency
+* media-processing duration
+* transcoding failures
+* queue depth
+* event lag
+* search latency
+* search errors
+* database performance
+* Redis performance
+* recommendation latency
+* notification delivery
+* subscription webhook failures
+
+## Tracing
+
+Trace:
+
+* HTTP
+* database
+* Redis
+* queues
+* events
+* search
+* media-processing workflows
+* external providers
+
+Define important SLO candidates.
+
+---
+
+# 36. RELIABILITY ARCHITECTURE
+
+Define behavior during:
+
+* PostgreSQL outage
+* Redis outage
+* search outage
+* CDN failure
+* S3 failure
+* media-worker failure
+* queue failure
+* Kafka/Redpanda failure
+* payment-provider outage
+* notification-provider outage
+* recommendation outage
+
+For each:
+
+* user-visible behavior
+* retry behavior
+* timeout
+* fallback
+* recovery
+* data-consistency strategy
+
+Core playback and core account operations should degrade gracefully when noncritical systems fail.
+
+---
+
+# 37. DATA RETENTION AND LIFECYCLE
+
+Define retention for:
+
+* sessions
+* playback history
+* analytics events
+* notifications
+* audit events
+* media-processing records
+* source media
+* derived media
+* search documents
+* deleted accounts
+* deleted playlists
+* recommendation signals
+
+Define:
+
+* deletion
+* archival
+* anonymization
+* expiration
+* legal/operational retention boundaries where applicable
+
+Do not claim regulatory compliance without validating actual requirements and implementation.
+
+---
+
+# 38. MOBILE ARCHITECTURE
+
+Define the mobile application architecture.
+
+Use:
+
+* React Native
+* Expo
+* TypeScript
+* React Navigation
+* TanStack Query
+* Zustand
+
+Define:
+
+* navigation
+* authentication state
+* server-state management
+* player state
+* queue state
+* local persistence
+* secure storage
+* deep linking
+* offline behavior
+* network recovery
+* background playback
+* audio interruptions
+* device media controls
+* push notifications
+* accessibility
+
+Clearly separate:
+
+* server state
+* local UI state
+* playback engine state
+* durable local preferences
+
+---
+
+# 39. MOBILE PLAYBACK ARCHITECTURE
+
+Define:
+
+* audio player abstraction
+* playback service
+* queue
+* background playback
+* lock-screen controls where supported
+* headset/Bluetooth interactions where supported
+* interruptions
+* network transitions
+* buffering
+* quality changes
+* playback errors
+* telemetry
+
+Avoid tying business logic directly to a specific platform implementation.
+
+---
+
+# 40. CACHE AND SYNCHRONIZATION STRATEGY
+
+Define:
+
+* server cache
+* client cache
+* Redis cache
+* CDN cache
+* TanStack Query cache
+* local mobile persistence
+
+For every cache define:
+
+* authority
+* TTL
+* invalidation
+* stale behavior
+* refresh behavior
+
+Ensure mutations invalidate affected cached data.
+
+---
+
+# 41. API SECURITY
+
+Define:
+
+* rate limits
+* request validation
+* payload limits
+* authentication throttling
+* pagination limits
+* query complexity limits
+* search limits
+* upload limits
+* playback authorization limits
+* abuse prevention
+
+Prevent users from bypassing limits by:
+
+* rotating IDs
+* using multiple sessions
+* manipulating pagination
+* replaying requests
+* exploiting unauthenticated endpoints
+
+---
+
+# 42. MEDIA ACCESS SECURITY
+
+Define the authorization flow for:
+
+* source audio
+* processed audio
+* HLS manifests
+* HLS segments
+* artwork
+* private media
+
+Consider:
+
+* short-lived authorization
+* signed URLs
+* signed cookies
+* CDN controls
+* entitlement validation
+* expiration
+* revocation limitations
+
+The architecture must acknowledge that CDN-delivered media cannot be made absolutely impossible to capture once legitimately delivered to a client.
+
+Design for reasonable access control rather than impossible guarantees.
+
+---
+
+# 43. ADMINISTRATION AND MODERATION
+
+Define administrative boundaries for:
+
+* users
+* artists
+* albums
+* tracks
+* playlists where appropriate
+* media
+* reports
+* moderation
+* catalog publication
+* takedowns
+* account restrictions
+* operational jobs
+
+Every privileged operation must be:
+
+* authenticated
+* authorized
+* auditable
+
+---
+
+# 44. INFRASTRUCTURE ARCHITECTURE
+
+Define the production topology.
+
+Evaluate:
+
+* AWS regions
+* availability zones
+* VPC
+* public/private subnets
+* load balancing
+* application compute
+* worker compute
+* PostgreSQL
+* Redis
+* OpenSearch
+* S3
+* CloudFront
+* DNS
+* TLS
+* WAF
+* secrets
+* IAM
+* monitoring
+
+Explain why each component exists.
+
+---
+
+# 45. SCALABILITY
+
+Design for substantial scale.
+
+The architecture should be capable of supporting growth toward:
+
+* millions of users
+* high concurrent playback
+* large music catalogs
+* large playlist counts
+* high search traffic
+* large playback-event volume
+* large media-processing workloads
+
+Do not invent exact capacity guarantees without load testing.
+
+Identify likely bottlenecks:
+
+* playback authorization
+* CDN traffic
+* PostgreSQL
+* Redis
+* search
+* media processing
+* analytics ingestion
+* event streams
+* recommendation computation
+
+Define scaling strategies for each.
+
+---
+
+# 46. FAILURE MATRICES
+
+Create explicit failure matrices for critical workflows.
+
+At minimum:
+
+### Authentication
+
+* database unavailable
+* Redis unavailable
+* invalid credentials
+* expired session
+* replayed token
+
+### Playback
+
+* authorization failure
+* entitlement unavailable
+* CDN failure
+* manifest failure
+* segment failure
+* network loss
+* player interruption
+
+### Playlist
+
+* concurrent update
+* stale client
+* unauthorized collaborator
+* duplicate request
+
+### Media Processing
+
+* worker crash
+* FFmpeg failure
+* corrupted input
+* duplicate job
+* storage failure
+
+### Search
+
+* stale index
+* indexing failure
+* search outage
+* malformed query
+
+### Subscription
+
+* provider outage
+* duplicate webhook
+* out-of-order webhook
+* reconciliation mismatch
+
+### Notifications
+
+* provider outage
+* duplicate event
+* invalid token
+* worker failure
+
+---
+
+# 47. SECURITY AND PRIVACY INVARIANTS
+
+Define explicit invariants such as:
+
+* users cannot access another user's private data
+* users cannot modify playlists without permission
+* only authorized users can manage artist content
+* clients cannot grant themselves premium entitlements
+* private playlists never enter public search
+* raw provider secrets never reach clients
+* private media cannot be accessed without authorization
+* duplicate likes do not create duplicate records
+* duplicate webhook events do not create duplicate subscription state transitions
+* duplicate jobs do not corrupt media state
+* search cannot expose unpublished content
+* analytics cannot modify authoritative business state
+
+---
+
+# 48. ARCHITECTURAL DECISION RECORDS
+
+Define ADRs for major decisions.
+
+At minimum evaluate ADRs for:
+
+* PostgreSQL as transactional authority
+* Redis usage
+* search architecture
+* HLS/adaptive streaming
+* S3/CloudFront media architecture
+* BullMQ
+* Kafka/Redpanda
+* mobile architecture
+* playback synchronization
+* recommendation architecture
+* subscription/payment architecture
+* authentication/session strategy
+* multi-region strategy
+* Kubernetes/EKS decision
+
+Each ADR should contain:
+
+* decision
+* alternatives
+* rationale
+* consequences
+* operational implications
+
+---
+
+# 49. TEST ARCHITECTURE
+
+Define the architecture-level testing strategy.
+
+Include:
+
+* unit testing
+* integration testing
+* database testing
+* API testing
+* contract testing
+* authorization testing
+* concurrency testing
+* event testing
+* queue testing
+* media-processing testing
+* playback authorization testing
+* search testing
+* subscription webhook testing
+* mobile testing
+* E2E
+* accessibility
+* performance
+* resilience
+* security regression
+
+Define test boundaries and environments.
+
+---
+
+# 50. DEPLOYMENT ARCHITECTURE
+
+Define:
+
+* local development
+* development environment
+* staging
+* production
+* CI/CD
+* database migrations
+* application deployment
+* worker deployment
+* media-processing deployment
+* search index migration
+* rollback strategy
+* configuration
+* secrets
+* health checks
+* graceful shutdown
+
+Deployment must support safe incremental releases.
+
+---
+
+# 51. VERSIONING AND EVOLUTION
+
+Define versioning for:
+
+* REST APIs
+* database migrations
+* events
+* search indexes
+* media-processing contracts
+* job payloads
+* recommendation data
+* mobile/backend compatibility
+
+Design for rolling deployments where old and new application versions may coexist temporarily.
+
+Avoid breaking event consumers during schema evolution.
+
+---
+
+# 52. ARCHITECTURE DELIVERABLE
+
+Produce a comprehensive architecture specification containing:
+
+1. Repository architecture audit
+2. System context
+3. Architecture principles
+4. Bounded contexts
+5. Dependency rules
+6. Source-of-truth matrix
+7. Domain model
+8. Catalog architecture
+9. Playlist architecture
+10. Library architecture
+11. Playback architecture
+12. Queue architecture
+13. Media architecture
+14. Adaptive streaming architecture
+15. Media-processing architecture
+16. Search architecture
+17. Recommendation architecture
+18. Analytics architecture
+19. Event architecture
+20. Redis architecture
+21. Subscription/payment architecture
+22. Notification architecture
+23. Authentication architecture
+24. Authorization model
+25. API architecture
+26. Database architecture
+27. Concurrency model
+28. Idempotency model
+29. Privacy architecture
+30. Security threat model
+31. Observability architecture
+32. Reliability architecture
+33. Data lifecycle
+34. Mobile architecture
+35. Cache/synchronization strategy
+36. Media access security
+37. Administration/moderation
+38. Infrastructure topology
+39. Scalability model
+40. Failure matrices
+41. Security/privacy invariants
+42. ADRs
+43. Testing architecture
+44. Deployment architecture
+45. Versioning strategy
+46. Architectural risks
+47. Migration strategy for existing repository code
+
+---
+
+# 53. IMPLEMENTATION BOUNDARY
+
+This prompt defines architecture only.
+
+Do NOT:
+
+* implement backend modules
+* implement mobile screens
+* implement database migrations
+* implement API controllers
+* implement media workers
+* implement infrastructure
+* write production source code
+* create fake implementation files
+* create placeholder files
+* claim implementation is complete
+
+The output must describe the architecture precisely enough for later engineering implementation.
+
+---
+
+# 54. REPOSITORY COMPATIBILITY
+
+If existing repository implementation conflicts with the desired architecture:
+
+* identify the conflict
+* determine whether the existing implementation is reusable
+* define the migration required
+* preserve compatible behavior
+* avoid unnecessary rewrites
+* avoid duplicate systems
+
+Never assume a clean-slate project when the repository contains implementation.
+
+---
+
+# 55. FINAL ARCHITECTURAL VALIDATION
+
+Before completing the architecture, verify:
+
+* every major domain has a clear owner
+* dependencies do not form uncontrolled cycles
+* PostgreSQL authority is clear
+* Redis authority is limited
+* search is a projection
+* media lifecycle is defined
+* playback authorization is secure
+* CDN access is controlled
+* subscription entitlement is server-authoritative
+* webhook processing is idempotent
+* events have schemas and versions
+* background jobs are idempotent
+* private data boundaries are explicit
+* administrative permissions are explicit
+* concurrency behavior is defined
+* failure behavior is defined
+* observability is defined
+* scalability bottlenecks are identified
+* mobile/server responsibilities are clear
+* deployment strategy is defined
+* migration/versioning strategy is defined
+* testing boundaries are defined
+
+Do not leave critical architectural decisions implicit.
+
+---
+
+# 56. FACTUAL REPORTING
+
+At the end, clearly distinguish:
+
+* architecture discovered in the repository
+* architecture proposed for the platform
+* existing implementation gaps
+* architectural conflicts
+* migration requirements
+* unresolved decisions
+* assumptions
+* risks
+
+Do not claim that code was implemented.
+
+Do not claim that tests passed unless tests were actually executed.
+
+Do not claim that infrastructure exists unless it actually exists in the repository.
+
+Do not claim production readiness based solely on architectural design.
+
+---
+
+# 57. STANDALONE REQUIREMENT
+
+This architecture prompt is fully standalone.
+
+It must be executable without requiring:
+
+* a previous prompt
+* a previous architecture document
+* a previous AI response
+* hidden conversation context
+* an assumed approved design
+
+The repository remains the implementation source of truth.
+
+Any later implementation prompt must independently contain enough project context and technical constraints to perform its assigned work safel
+
 You are operating in Senior Engineering Team Mode.
 
 Design the complete foundational architecture for an enterprise-scale global music streaming and audio entertainment platform comparable in architectural scope to Spotify.
