@@ -1,1387 +1,1192 @@
-You are operating in Senior Engineering Team Mode.
+# Spotify-Style Music Streaming Platform
+
+## Backend Implementation Prompt — Volume 3
+
+### User Library, Likes, Follows, Playlists & Collaborative Playlists
+
+You are the backend engineering team for an original, production-grade global music streaming platform inspired by the capabilities and user experience of services such as Spotify, Apple Music, YouTube Music, and similar platforms.
 
-Build the production-ready backend for the music catalog, artists, labels, releases, tracks, metadata, audio assets, artwork, lyrics, content rights, availability, localization, content ingestion, and artist/partner management domains for an enterprise-scale global music streaming and audio entertainment platform comparable in architectural scope to Spotify.
+This prompt is fully standalone. Do not assume that another prompt, architecture document, specification, previous AI response, or prior conversation is available. The repository itself is the implementation source of truth. If compatible backend functionality already exists, inspect and reuse it rather than creating competing implementations.
 
-The platform is an original implementation.
+Your mission in this volume is to implement the backend functionality for:
 
-Do not copy proprietary source code, internal architecture, branding, confidential implementation details, proprietary algorithms, or private implementation details from Spotify or any other company.
+* User library
+* Liked tracks
+* Saved albums
+* Saved playlists
+* Follow relationships
+* User-created playlists
+* Playlist items
+* Playlist ordering
+* Playlist visibility
+* Playlist ownership
+* Playlist permissions
+* Collaborative playlists
+* Playlist mutation concurrency
+* Library synchronization
+* Related domain events
+* Required caching and invalidation
+* Required authorization, auditing, testing, migrations, and documentation
 
-This prompt is completely independent and may be executed in a separate conversation.
+Do **not** implement the complete playback/media-delivery, recommendation, search, subscription/payment, notification, or analytics systems in this volume.
 
-The backend must follow the approved Spotify-like architecture, domain boundaries, database ownership, API conventions, security model, media architecture, rights architecture, event architecture, queue architecture, and Project Index.
+---
 
-Do not redesign the architecture.
+# 1. Engineering Role
 
-Do not generate frontend code.
+Act as a senior production engineering organization consisting of:
 
-Do not generate mobile code.
+* Principal Software Architect
+* Staff Backend Engineer
+* Database Architect
+* Security Engineer
+* Distributed Systems Engineer
+* QA Engineer
+* DevOps Engineer
+* Technical Writer
 
-Do not generate infrastructure implementation code.
+Do not behave as a teacher.
 
-Do not generate Terraform.
+Inspect the repository first and determine:
 
-Do not generate Kubernetes manifests.
+* Existing project structure
+* Existing NestJS modules
+* Existing domain/application/infrastructure layers
+* Existing Prisma schema
+* Existing migrations
+* Existing authentication and authorization
+* Existing Redis infrastructure
+* Existing API conventions
+* Existing DTO conventions
+* Existing error handling
+* Existing event/outbox infrastructure
+* Existing queue infrastructure
+* Existing testing infrastructure
+* Existing logging and observability
+* Existing naming conventions
 
-Do not generate CI/CD workflows.
+Integrate with the implementation already present.
 
-────────────────────────────────────────
+Do not blindly overwrite existing code.
 
-MISSION
+Do not create duplicate models, modules, repositories, services, controllers, infrastructure abstractions, or utilities when compatible implementations already exist.
 
-Implement the production-ready backend required for:
+If repository implementation differs from the assumptions in this prompt, preserve working behavior and make the smallest safe changes necessary to satisfy the requirements.
 
-• Artists
-• Artist teams
-• Labels
-• Label staff
-• Content partners
-• Albums
-• Releases
-• Tracks
-• Track versions
-• Track credits
-• Genres
-• Tags
-• Languages
-• Lyrics metadata
-• Explicit-content metadata
-• Artwork
-• Audio assets
-• Audio processing state
-• Audio renditions
-• Content identifiers
-• Content localization
-• Content ingestion
-• Release scheduling
-• Publishing
-• Unpublishing
-• Content rights
-• Regional availability
-• Platform availability
-• Artist/content-partner administration
-• Catalog moderation integration
-• Search-index integration
+---
 
-The implementation must support:
+# 2. Technology Baseline
 
-• Millions of tracks
-• Millions of albums/releases
-• Large artist ecosystems
-• Labels and distribution partners
-• Multiple versions of tracks
-• Regional rights
-• Multiple languages
-• Scheduled releases
-• High catalog-read traffic
-• Large media metadata volumes
-• Global content delivery
+Use the technology already established by the repository.
 
-────────────────────────────────────────
+The intended backend stack is:
 
-TECHNOLOGY STACK
+* Node.js
+* NestJS
+* TypeScript
+* PostgreSQL
+* Prisma ORM
+* Redis
+* REST APIs
+* BullMQ where asynchronous processing is justified
+* Kafka or Redpanda where durable domain/event streaming is justified
+* OpenAPI/Swagger
+* Docker
+* OpenTelemetry
+* Prometheus
+* Grafana
+* Loki
+* Tempo
 
-Backend:
+Do not introduce unnecessary infrastructure.
 
-• Node.js
-• NestJS
-• TypeScript
+Do not replace existing technology merely for stylistic reasons.
 
-Database:
+---
 
-• PostgreSQL
-• Prisma ORM
+# 3. Scope of This Volume
 
-Cache:
+Implement the complete backend foundation for the following domains:
 
-• Redis
+## User Library
 
-Object Storage:
+Users must be able to manage their personal music library, including:
 
-• AWS S3-compatible object storage
+* Liked tracks
+* Saved albums
+* Saved playlists
+* Followed artists
+* Followed users where supported by the existing product model
+* Library retrieval
+* Library pagination
+* Library mutation
+* Library synchronization metadata where required
 
-CDN:
-
-• CloudFront or equivalent CDN
-
-Event Streaming:
-
-• Kafka or Redpanda
-
-Background Processing:
-
-• BullMQ
-
-Media Processing:
-
-• FFmpeg or approved audio-processing infrastructure
-
-Search:
-
-• Elasticsearch/OpenSearch integration
-
-Testing:
-
-• Jest
-• Supertest
-• Integration and contract testing tools
-
-────────────────────────────────────────
-
-IMPLEMENTATION RULES
-
-Never generate pseudo-code.
-
-Never generate placeholders.
-
-Never generate TODO comments.
-
-Never omit implementations.
-
-Never say:
-
-- "implement similarly"
-- "left as an exercise"
-- "for brevity"
-- "remaining code omitted"
-
-Every generated file must be complete.
-
-Every generated file must compile.
-
-Never regenerate unchanged files.
-
-Only modify existing files when required.
-
-Use strict TypeScript.
-
-Use dependency injection.
-
-Keep controllers thin.
-
-Keep domain rules outside controllers.
-
-Use repositories for persistence.
-
-Use DTOs for API contracts.
-
-Use centralized validation.
-
-Use centralized error handling.
-
-Use structured logging.
-
-Use the established observability infrastructure.
-
-────────────────────────────────────────
-
-DOMAIN OWNERSHIP
-
-Maintain explicit boundaries between:
-
-• Artists
-• Artist teams
-• Labels
-• Content partners
-• Albums
-• Releases
-• Tracks
-• Track credits
-• Metadata
-• Audio assets
-• Artwork
-• Lyrics
-• Rights
-• Availability
-• Localization
-• Content ingestion
-• Publishing
-
-Do not combine:
-
-• Catalog metadata with raw media
-• Rights with playback sessions
-• Artist ownership with user profile data
-• Audio processing with catalog publication state
-
-────────────────────────────────────────
-
-ARTIST DOMAIN
+## Playlists
 
 Implement:
 
-• Artist creation
-• Artist profile
-• Artist metadata
-• Artist aliases
-• Artist status
-• Artist verification
-• Artist members
-• Artist staff
-• Artist permissions
+* Playlist creation
+* Playlist editing
+* Playlist deletion
+* Playlist ownership
+* Playlist visibility
+* Playlist description
+* Playlist artwork reference
+* Playlist item management
+* Playlist ordering
+* Playlist metadata
+* Playlist sharing
+* Playlist collaboration
+* Playlist permissions
+* Playlist item removal
+* Playlist item insertion
+* Playlist item reordering
 
-Support artist states such as:
+## Follows
 
-• Draft
-• Pending
-• Verified
-• Active
-• Suspended
-• Archived
+Implement appropriate follow relationships for:
 
-────────────────────────────────────────
+* Artists
+* Users, if supported by the domain model
 
-ARTIST TEAM
+Do not create relationships that are not justified by the actual product model.
 
-Implement:
+---
 
-• Team creation
-• Member invitation
-• Member acceptance
-• Role assignment
-• Role removal
-• Staff suspension
-• Team permissions
+# 4. Domain Modeling
 
-Roles may include:
+Design the database and domain model carefully.
 
-• Artist Owner
-• Manager
-• Editor
-• Analytics Viewer
-• Content Manager
+Potential entities include:
 
-Enforce artist-scoped permissions.
+* User
+* Artist
+* Album
+* Track
+* Playlist
+* PlaylistItem
+* LikedTrack
+* SavedAlbum
+* SavedPlaylist
+* Follow
+* PlaylistCollaborator
+* PlaylistPermission
+* LibraryMutation or synchronization metadata where justified
 
-────────────────────────────────────────
+Use the existing repository schema when possible.
 
-LABEL DOMAIN
+Do not blindly create every entity listed above if the existing architecture already models the concept differently.
 
-Implement:
+Every relationship must have:
 
-• Label creation
-• Label profile
-• Label users
-• Label staff
-• Label permissions
-• Label status
-
-Support:
-
-• Active
-• Suspended
-• Archived
-
-Labels must only access content and analytics authorized for their organization.
-
-────────────────────────────────────────
-
-CONTENT PARTNERS
-
-Support:
-
-• Distributor
-• Production partner
-• Rights partner
-• Content supplier
+* Clear ownership
+* Appropriate foreign keys
+* Referential integrity
+* Appropriate uniqueness constraints
+* Appropriate indexes
+* Explicit lifecycle behavior
 
-Implement:
+---
 
-• Partner registration
-• Partner organization
-• Partner staff
-• Permissions
-• Content submission
-• Rights declarations
-• Asset upload references
+# 5. User Library
 
-────────────────────────────────────────
+Implement a durable user library.
 
-ALBUM DOMAIN
+The library must support efficient access to:
 
-Implement:
+* Liked tracks
+* Saved albums
+* Saved playlists
+* Followed artists
+* Relevant followed users
 
-• Album creation
-• Album metadata
-• Album artwork
-• Album type
-• Release association
-• Track ordering
-• Localization
-• Status
+Implement APIs for adding and removing library items.
 
-Support:
+Operations must be:
 
-• Album
-• EP
-• Compilation
-• Deluxe
-• Reissue
-• Single-related release structures
+* Authenticated
+* Authorized
+* Idempotent where appropriate
+* Safe under concurrent requests
+* Efficient for large libraries
 
-────────────────────────────────────────
+Do not rely exclusively on Redis for library persistence.
 
-RELEASE DOMAIN
+PostgreSQL must remain the authoritative source of truth.
 
-Implement:
+---
 
-• Release creation
-• Release metadata
-• Release date
-• Scheduled publication
-• Release status
-• Track order
-• Artwork
-• Localization
-• Rights
-• Territory availability
+# 6. Liked Tracks
 
-Support:
+Implement a robust liked-track system.
 
-• Draft
-• Submitted
-• Validating
-• Processing
-• Review
-• Approved
-• Scheduled
-• Published
-• Unpublished
-• Archived
-• Removed
+Requirements:
 
-────────────────────────────────────────
+* User can like a track
+* User can unlike a track
+* Repeated like requests must not create duplicates
+* Repeated unlike requests must be safe
+* Authorization must ensure users can only modify their own library
+* Queries must support pagination
+* Ordering should be deterministic
+* The system should preserve a meaningful saved/liked timestamp
+* Database uniqueness must prevent duplicate relationships
 
-TRACK DOMAIN
+Expose appropriate REST endpoints according to repository conventions.
 
-Implement:
+Possible semantics include:
 
-• Track creation
-• Track metadata
-• Track duration
-• Track version
-• Track identifiers
-• Explicit-content state
-• Genre/tag association
-• Credits
-• Release association
-• Audio asset association
+```text
+PUT    /v1/me/tracks/{trackId}
+DELETE /v1/me/tracks/{trackId}
+GET    /v1/me/tracks
+```
 
-Support different versions:
+Adapt paths to the repository's existing API conventions rather than blindly copying these examples.
 
-• Original
-• Radio edit
-• Remaster
-• Live
-• Acoustic
-• Instrumental
-• Remix
+---
 
-Do not assume one track corresponds to exactly one audio file.
+# 7. Saved Albums
 
-────────────────────────────────────────
+Users must be able to:
 
-TRACK IDENTIFIERS
+* Save an album
+* Remove an album
+* List saved albums
+* Paginate through saved albums
+* Determine whether an album is saved
 
-Support appropriate industry identifiers where applicable:
+Implement efficient database queries.
 
-• ISRC
-• UPC/EAN
-• Catalog number
-• Internal platform identifier
+Avoid N+1 queries.
 
-Define uniqueness rules.
+Use database constraints to prevent duplicate saved-album relationships.
 
-Do not assume all content will contain every external identifier.
+Preserve deterministic ordering, normally based on when the album was saved unless the existing product model specifies another ordering.
 
-────────────────────────────────────────
+---
 
-TRACK CREDITS
+# 8. Saved Playlists
 
-Support:
+Users must be able to:
 
-• Primary artist
-• Featured artist
-• Composer
-• Lyricist
-• Producer
-• Remixer
-• Engineer
-• Other configured credit roles
+* Save playlists created by other users
+* Remove saved playlists
+* Retrieve saved playlists
+* Determine whether a playlist is saved
 
-Define:
+Clarify the distinction between:
 
-• Role
-• Person/artist
-• Ordering
-• Display behavior
+* Playlist owner
+* Playlist collaborator
+* Playlist viewer
+* Playlist saved by another user
 
-────────────────────────────────────────
+A user saving a playlist must not automatically gain editing permissions.
 
-GENRES AND TAGS
+Do not allow saved-playlist functionality to bypass playlist visibility or authorization rules.
 
-Implement:
+---
 
-• Genre creation
-• Genre hierarchy
-• Tags
-• Genre assignment
-• Content-tag assignment
+# 9. Follow System
 
-Prevent invalid hierarchical relationships.
+Implement artist and, where supported, user follow relationships.
 
-────────────────────────────────────────
+Requirements:
 
-LANGUAGES
+* Follow
+* Unfollow
+* Follow status
+* Followers pagination
+* Following pagination
+* Duplicate prevention
+* Authorization
+* Consistent timestamps
+* Safe concurrent mutations
 
-Support:
+For artist follows, enforce the correct relationship between the authenticated user and the artist.
 
-• Language entity
-• Locale
-• Audio language
-• Lyrics language
-• Metadata language
+For user follows, prevent invalid self-follow behavior if the product rules prohibit it.
 
-Define fallback behavior for localized metadata.
+Avoid exposing private user information through follower/following APIs.
 
-────────────────────────────────────────
+---
 
-CONTENT LOCALIZATION
+# 10. Playlist Creation
 
-Support localized:
+Implement complete playlist creation.
 
-• Artist names
-• Album titles
-• Track titles
-• Descriptions
-• Genre names
-• Editorial metadata
-• Lyrics metadata
+A playlist should support appropriate fields such as:
 
-Do not require every locale before publication unless explicitly configured.
+* ID
+* Owner
+* Name
+* Description
+* Visibility
+* Artwork reference
+* Collaborative flag
+* Created timestamp
+* Updated timestamp
+* Version/revision where needed
 
-────────────────────────────────────────
+Playlist names and descriptions must be validated.
 
-ARTWORK
+Do not allow:
 
-Implement artwork metadata.
+* Empty required names
+* Oversized fields
+* Invalid identifiers
+* Unauthorized ownership manipulation
+* Arbitrary media URLs
+* Arbitrary storage paths
 
-Support:
+Artwork must reference the platform's controlled media/storage abstraction rather than allowing arbitrary external storage access.
 
-• Cover artwork
-• Artist artwork
-• Playlist artwork references where appropriate
-• Multiple resolutions
-• Processing status
-• Alt text
-• Localization where required
+---
 
-Store binaries in object storage, not PostgreSQL.
+# 11. Playlist Visibility
 
-────────────────────────────────────────
+Support the repository's appropriate visibility model.
 
-AUDIO ASSET DOMAIN
+Possible states include:
 
-Implement metadata for source audio assets.
+* Public
+* Private
+* Unlisted/shareable
 
-Track:
+Do not introduce visibility modes without a clear product or architectural reason.
 
-• Object key
-• MIME type
-• File size
-• Duration
-• Sample rate
-• Channels
-• Codec
-• Bit depth
-• Loudness metadata
-• Processing status
-• Validation status
+Visibility must be enforced server-side.
 
-The asset record is metadata and state.
+A private playlist must never become accessible merely because a user knows or guesses its identifier.
 
-The actual audio object belongs in object storage.
+Every playlist retrieval path must evaluate:
 
-────────────────────────────────────────
+* Authentication state
+* Owner status
+* Collaboration permissions
+* Visibility
+* Resource existence
 
-AUDIO INGESTION
+Avoid leaking the existence of private resources through authorization errors.
 
-Implement:
+---
 
-• Upload initialization
-• Signed upload URL
-• Upload completion
-• Ownership validation
-• File verification
-• Processing request
+# 12. Playlist Ownership
 
-Do not trust client-provided:
+The playlist owner has authority over playlist-level administrative operations.
 
-• MIME type
-• Duration
-• Codec
-• File size
+Implement authorization rules for:
 
-Validate these values from the uploaded asset.
+* Editing metadata
+* Changing visibility
+* Enabling/disabling collaboration
+* Managing collaborators
+* Deleting playlists
+* Managing artwork
+* Managing permissions
 
-────────────────────────────────────────
+Never trust a client-provided owner identifier.
 
-CONTENT PROCESSING STATE
+Ownership must come from authenticated server-side identity and database relationships.
 
-Track:
+---
 
-• Uploaded
-• Validating
-• Validated
-• Processing
-• Processed
-• Failed
-• Reprocessing
-• Ready
+# 13. Playlist Items
 
-Do not mark a track published before required media validation succeeds.
+Implement playlist track membership.
 
-────────────────────────────────────────
+A playlist item should support appropriate information such as:
 
-AUDIO RENDITIONS
+* Playlist ID
+* Track ID
+* Stable item ID where useful
+* Position/order
+* Added by user
+* Added timestamp
+* Optional snapshot/version information if justified
 
-Implement metadata for processed renditions.
+Do not duplicate the complete Track entity inside PlaylistItem.
 
-Support:
+Reference the authoritative catalog Track entity.
 
-• Codec
-• Container
-• Bitrate
-• Sample rate
-• Channel count
-• Quality tier
-• Object key
-• Duration
-• Processing version
+The system must support:
 
-Support future quality tiers such as:
+* Add track
+* Remove track
+* Retrieve playlist tracks
+* Retrieve item metadata
+* Reorder tracks
+* Bulk mutations where justified
 
-• Low
-• Standard
-• High
-• Lossless
+Avoid inefficient per-item queries.
 
-Do not hard-code a fixed codec list into core domain logic.
+---
 
-────────────────────────────────────────
+# 14. Playlist Ordering
 
-MEDIA PROCESSING JOBS
+Playlist ordering is a concurrency-sensitive operation.
 
-Use BullMQ for:
+Design it carefully.
 
-• Audio validation
-• Metadata extraction
-• Loudness analysis
-• Transcoding
-• Rendition generation
-• Artwork processing
-• Lyrics processing
+The implementation must handle:
 
-Every job must support:
+* Concurrent inserts
+* Concurrent removals
+* Concurrent reorders
+* Multiple devices modifying the same playlist
+* Stale clients
+* Retry requests
+* Duplicate requests
 
-• Retry
-• Backoff
-• Timeout
-• Idempotency
-• Failure state
-• Dead-letter handling
-• Monitoring
+Choose an ordering strategy appropriate for PostgreSQL and the expected scale.
 
-────────────────────────────────────────
+Possible approaches include:
 
-CONTENT INGESTION WORKFLOW
+* Integer positions with transactional resequencing
+* Fractional ordering
+* Lexicographic ordering keys
+* Explicit revision-based mutation
 
-Implement:
+Choose the strategy based on the repository architecture and scalability requirements.
 
-Draft
-→ Submitted
-→ Validating
-→ Processing
-→ Review
-→ Approved
-→ Scheduled
-→ Published
-→ Unpublished
-→ Archived
-→ Removed
+Do not implement a fragile ordering mechanism merely because it is simpler.
 
-Define:
+---
 
-• State ownership
-• Transition permissions
-• Validation
-• Moderation integration
-• Rights checks
-• Event generation
-• Audit
+# 15. Playlist Revision and Optimistic Concurrency
 
-────────────────────────────────────────
+Where playlist mutation conflicts are possible, implement optimistic concurrency.
 
-RELEASE SCHEDULING
+A playlist or playlist mutation model should have a safe revision/version mechanism where justified.
 
-Support:
+Clients may submit the revision they last observed.
 
-• Immediate publication
-• Scheduled publication
-• Scheduled unpublication
-• Time zones
-• Territory-specific schedules where required
+If the playlist has changed since that revision:
 
-Use background jobs for scheduled transitions.
+* Detect the conflict
+* Do not silently overwrite newer changes
+* Return a deterministic conflict response
+* Provide enough information for the client to refresh
 
-Do not rely on client devices to trigger publication.
+Do not allow last-write-wins behavior to silently destroy playlist changes when stronger concurrency protection is appropriate.
 
-────────────────────────────────────────
+---
 
-RIGHTS DOMAIN
+# 16. Collaborative Playlists
 
-Implement:
+Implement collaborative playlist support.
 
-• Rights records
-• Content ownership
-• Licensor
-• Licensee
-• Territory
-• Start date
-• End date
-• Content type
-• Platform restriction
-• Subscription restriction
+Requirements include:
 
-Rights must be auditable.
+* Owner enables/disables collaboration
+* Authorized collaborators can add tracks
+* Authorized collaborators can remove tracks
+* Authorized collaborators can reorder tracks where permitted
+* Owner can manage collaborators
+* Collaborator permissions are server-enforced
+* Non-collaborators cannot mutate collaborative playlists
+* Read access still follows playlist visibility rules
 
-────────────────────────────────────────
+Define a clear authorization model.
 
-RIGHTS VALIDATION
+Potential roles:
 
-Before publication, validate:
+* OWNER
+* EDITOR
+* VIEWER
 
-• Required rights exist
-• Rights cover the target region
-• Rights dates are valid
-• Conflicting rights are detected
-• Platform restrictions are satisfied
+Only introduce roles that are actually needed.
 
-Before playback, the later playback service will validate active rights.
+Do not allow users to grant themselves collaboration privileges.
 
-────────────────────────────────────────
+---
 
-CONTENT AVAILABILITY
+# 17. Collaborator Management
 
-Implement availability records for:
+Implement appropriate APIs for:
 
-• Country
-• Region
-• Platform
-• Device class
-• Subscription tier
-• Start date
-• End date
+* Add collaborator
+* Remove collaborator
+* List collaborators
+* Update collaborator permission where supported
 
-Support states such as:
+Authorization must be checked for every operation.
 
-• Available
-• Scheduled
-• Expired
-• Blocked
+The server must verify:
 
-────────────────────────────────────────
+* Authenticated user
+* Playlist ownership
+* Existing collaborator status
+* Playlist collaboration state
+* Target user/resource validity
 
-RIGHTS EXPIRATION
+Prevent:
 
-Implement background jobs for:
+* Self-escalation
+* Unauthorized collaborator insertion
+* IDOR
+* Permission bypass
+* Modification of playlists the user does not control
 
-• Rights expiration
-• Availability updates
-• Content unpublishing
-• CDN access invalidation where required
-• Search-index updates
+---
 
-Do not delete historical rights records merely because they expire.
+# 18. Playlist Deletion
 
-────────────────────────────────────────
+Implement safe playlist deletion.
 
-CATALOG PUBLICATION
+Determine the correct lifecycle strategy based on the repository architecture.
 
-Implement publication validation.
+Consider:
 
-A release cannot become published unless:
+* Referential integrity
+* Saved playlists
+* Collaborators
+* Playlist items
+* Events
+* Caches
+* Search projections
+* Future recommendation consumers
 
-• Required metadata exists
-• Required tracks exist
-• Required audio assets are ready
-• Required artwork is ready
-• Rights are valid
-• Availability is configured
-• Moderation requirements are satisfied
+If hard deletion is safe, use it.
 
-Define configurable validation policies.
+If a lifecycle state is necessary, implement it explicitly.
 
-────────────────────────────────────────
+Do not leave orphaned playlist items or broken relationships.
 
-SEARCH INDEX INTEGRATION
+Deletion must be transactional.
 
-Publish catalog changes to the established search infrastructure.
+---
 
-Events may include:
+# 19. Cache Strategy
 
-• ArtistCreated
-• ArtistUpdated
-• AlbumCreated
-• AlbumUpdated
-• ReleasePublished
-• ReleaseUnpublished
-• TrackCreated
-• TrackUpdated
-• TrackPublished
-• TrackUnpublished
-• RightsChanged
-• AvailabilityChanged
+Use Redis only for appropriate acceleration and ephemeral state.
 
-Indexing must be idempotent.
+Potential cache targets:
 
-────────────────────────────────────────
+* Public playlist metadata
+* Frequently accessed playlist summaries
+* Follow state
+* Library summaries
+* Permission lookups where justified
 
-CACHE
+Every cache must define:
 
-Use Redis for appropriate catalog caching.
+* Key format
+* TTL
+* Invalidation trigger
+* Stale-data behavior
+* Failure behavior
 
-Cache:
+Database remains authoritative.
 
-• Artist profiles
-• Album metadata
-• Track metadata
-• Release metadata
-• Genre metadata
-• Public availability views
+Playlist mutation must invalidate or update affected cache entries.
 
-Define:
+Library mutations must not leave indefinitely stale library state.
 
-• Key patterns
-• TTL
-• Invalidation
-• Failure behavior
+Never make correctness depend exclusively on Redis availability.
 
-Redis is not authoritative.
+---
 
-────────────────────────────────────────
+# 20. Events and Outbox Integration
 
-API
+Where the repository uses an event-driven architecture, emit durable domain events for relevant mutations.
 
-Implement production-ready APIs.
+Potential events include:
 
-ARTISTS
+```text
+TrackLiked
+TrackUnliked
+AlbumSaved
+AlbumUnsaved
+PlaylistCreated
+PlaylistUpdated
+PlaylistDeleted
+PlaylistTrackAdded
+PlaylistTrackRemoved
+PlaylistReordered
+PlaylistCollaboratorAdded
+PlaylistCollaboratorRemoved
+ArtistFollowed
+ArtistUnfollowed
+UserFollowed
+UserUnfollowed
+```
 
-• Create
-• Get
-• Update
-• List
-• Verify
-• Suspend
+Use the actual event naming/versioning conventions established in the repository.
 
-ARTIST TEAMS
+Events should include appropriate metadata such as:
 
-• Invite
-• List members
-• Assign role
-• Remove member
+* Event ID
+* Event type
+* Event version
+* Aggregate ID
+* Actor/user ID where appropriate
+* Timestamp
+* Correlation ID
+* Trace context where supported
+* Safe domain payload
 
-LABELS
+Do not publish sensitive information unnecessarily.
 
-• Create
-• Get
-• Update
-• Manage staff
+If PostgreSQL state and event publication must remain consistent, use the existing transactional outbox mechanism or implement one if this repository lacks the necessary foundation and it is required by the architecture.
 
-RELEASES
+Do not rely on an unsafe pattern where a database transaction commits successfully but event publication silently fails.
 
-• Create
-• Get
-• Update
-• Submit
-• Schedule
-• Publish
-• Unpublish
-• Archive
+---
 
-ALBUMS
+# 21. Idempotency
 
-• Create
-• Get
-• Update
-• List
+Library and playlist mutations must be safe under retries.
 
-TRACKS
+Consider duplicate requests caused by:
 
-• Create
-• Get
-• Update
-• Associate with release
-• Manage credits
-• Submit
-• Publish
-• Unpublish
-
-MEDIA
-
-• Upload authorization
-• Completion
-• Metadata
-• Processing status
-
-RIGHTS
-
-• Create
-• Get
-• Update
-• Expire
-• Availability
-
-LOCALIZATION
-
-• Get translations
-• Add translation
-• Update translation
-
-Every endpoint must implement:
-
-• Authentication
-• Authorization
-• Validation
-• Artist/label/partner isolation
-• Rate limiting
-• OpenAPI documentation
-• Consistent errors
-• Idempotency where appropriate
-
-────────────────────────────────────────
-
-DATABASE
-
-Implement Prisma models and migrations for:
-
-• Artist
-• ArtistMember
-• ArtistRole
-• Label
-• LabelMember
-• ContentPartner
-• Album
-• Release
-• ReleaseTrack
-• Track
-• TrackVersion
-• TrackCredit
-• Genre
-• GenreRelation
-• ContentTag
-• Language
-• ArtistLocalization
-• AlbumLocalization
-• ReleaseLocalization
-• TrackLocalization
-• Artwork
-• AudioAsset
-• AudioRendition
-• MediaProcessingJobReference
-• ContentRight
-• ContentAvailability
-• ContentIdentifier
+* Mobile network retries
+* HTTP client retries
+* User double taps
+* Multiple devices
+* Worker retries
+* Connection failures after server-side success
 
 Use:
 
-• Primary keys
-• Foreign keys
-• Unique constraints
-• Composite indexes
-• Check constraints
-• Status fields
-• Effective/expiration timestamps
+* Unique constraints
+* Idempotency keys where appropriate
+* Transactional checks
+* Version checks
+* Deterministic mutation semantics
 
-────────────────────────────────────────
+Do not create duplicate library relationships or duplicate playlist operations because of retry behavior.
 
-DATABASE CONSISTENCY
+---
 
-Use transactions for:
+# 22. Transactions
 
-• Release-track ordering updates
-• Track/release associations
-• Artist-role changes
-• Rights changes
-• Publication state transitions
-• Media readiness state changes
+Use PostgreSQL transactions for operations that require atomicity.
 
-Do not use distributed transactions across storage or processing services.
+Examples:
 
-Use events and reconciliation.
+* Creating playlist and initial metadata
+* Adding/removing playlist items when ordering must remain consistent
+* Reordering playlist items
+* Collaborator changes
+* Playlist deletion
+* Library mutation plus required durable event/outbox record
 
-────────────────────────────────────────
+Keep transactions appropriately scoped.
 
-EVENTS
+Do not hold transactions open while performing slow external operations.
 
-Publish:
+---
 
-ARTISTS
+# 23. Database Design
 
-• ArtistCreated
-• ArtistUpdated
-• ArtistVerified
-• ArtistSuspended
-• ArtistMemberAdded
-• ArtistMemberRemoved
+Update Prisma models and migrations as necessary.
 
-LABELS
+Requirements:
 
-• LabelCreated
-• LabelUpdated
-• LabelMemberAdded
-• LabelMemberRemoved
+* Foreign keys
+* Appropriate cascading behavior
+* Unique constraints
+* Composite indexes
+* Query-oriented indexes
+* Timestamp indexes where useful
+* Efficient pagination support
+* Deterministic ordering
+* Referential integrity
 
-CONTENT
+Design for users with:
 
-• AlbumCreated
-• AlbumUpdated
-• ReleaseCreated
-• ReleaseSubmitted
-• ReleaseApproved
-• ReleasePublished
-• ReleaseUnpublished
-• ReleaseArchived
-• TrackCreated
-• TrackUpdated
-• TrackPublished
-• TrackUnpublished
+* Thousands of liked tracks
+* Thousands of saved albums
+* Hundreds/thousands of playlists
+* Large playlists
+* Large follower/following graphs
 
-MEDIA
+Do not optimize only for toy datasets.
 
-• AudioUploaded
-• AudioValidated
-• AudioProcessingStarted
-• AudioProcessingCompleted
-• AudioProcessingFailed
-• AudioRenditionGenerated
-• ArtworkUploaded
-• ArtworkProcessed
+---
 
-RIGHTS
+# 24. Pagination
 
-• RightsCreated
-• RightsUpdated
-• RightsExpired
-• AvailabilityChanged
+Implement production-grade pagination.
 
-LOCALIZATION
+Prefer cursor-based pagination for large, mutable collections where appropriate.
 
-• LocalizationCreated
-• LocalizationUpdated
+Pagination must be:
 
-Events must contain only required consumer data.
+* Deterministic
+* Stable
+* Efficient
+* Resistant to duplicates
+* Resistant to skipped records
 
-────────────────────────────────────────
+Apply this to:
 
-BACKGROUND JOBS
+* Liked tracks
+* Saved albums
+* Saved playlists
+* Followers
+* Following
+* Playlist items
+* Collaborators
 
-Implement:
+Follow existing repository pagination conventions.
 
-• Audio processing
-• Artwork processing
-• Metadata extraction
-• Publication scheduling
-• Rights expiration
-• Availability expiration
-• Search indexing
-• Cache invalidation
-• Media cleanup
-• Failed-processing retry
+---
 
-Every job must support:
+# 25. API Contracts
 
-• Retry
-• Backoff
-• Timeout
-• Idempotency
-• Dead-letter handling
-• Monitoring
+Implement complete REST APIs following existing repository conventions.
 
-────────────────────────────────────────
+Every endpoint must define:
 
-SELLER/PARTNER ISOLATION
+* Request DTO
+* Response DTO
+* Validation
+* Authentication requirements
+* Authorization rules
+* Error semantics
+* Pagination semantics
+* OpenAPI documentation
 
-Artist, label, and partner users must only access authorized content.
+Do not expose Prisma entities directly as API responses.
 
-Enforce isolation for:
+Map internal persistence/domain structures into stable API contracts.
 
-• Artists
-• Releases
-• Tracks
-• Media
-• Rights
-• Analytics references
-• Submission records
+Do not leak:
 
-Never trust organization IDs supplied by clients.
+* Password hashes
+* Session secrets
+* Internal identifiers that should remain private
+* Storage credentials
+* Internal database details
+* Private user information
 
-Derive organization scope from authenticated identity.
+---
 
-────────────────────────────────────────
+# 26. Error Handling
 
-ADMINISTRATION
+Use explicit domain/API errors.
 
-Implement administrative access for:
+Examples:
 
-• Artist management
-• Label management
-• Content moderation
-• Release approval
-• Rights investigation
-• Publication overrides
-• Content suspension
-• Media investigation
+* Playlist not found
+* Track not found
+* Album not found
+* Unauthorized
+* Forbidden
+* Invalid playlist name
+* Invalid visibility
+* Collaboration disabled
+* Insufficient playlist permission
+* Revision conflict
+* Invalid pagination cursor
+* Duplicate mutation where relevant
 
-High-risk actions must be audited.
+Do not return vague internal errors to clients.
 
-────────────────────────────────────────
+Do not expose stack traces or database internals in production responses.
 
-SECURITY
+---
 
-Protect against:
+# 27. Security
 
-• Unauthorized content upload
-• Cross-organization access
-• Malicious files
-• Metadata injection
-• Path traversal
-• Unauthorized publishing
-• Rights manipulation
-• Content scraping
-• IDOR
-• Privilege escalation
+Perform a security review of every new endpoint.
 
-Uploaded media must be validated before processing.
+Specifically defend against:
 
-────────────────────────────────────────
+* IDOR
+* Broken access control
+* Privilege escalation
+* Unauthorized playlist modification
+* Unauthorized library modification
+* User enumeration
+* Private playlist disclosure
+* Mass assignment
+* Parameter tampering
+* SQL injection
+* XSS through playlist metadata
+* Malicious identifiers
+* Rate-limit bypass
+* Abuse of collaboration endpoints
+* Oversized request bodies
+* Resource exhaustion
 
-OBSERVABILITY
+Authorization must always be enforced server-side.
 
-Instrument:
+Never trust:
 
-• Content ingestion
-• Uploads
-• Processing
-• Publication
-• Rights changes
-• Availability changes
-• Search indexing
-• Artist administration
+* User IDs
+* Owner IDs
+* Collaborator IDs
+* Permission values
+* Playlist visibility
+* Track ownership claims
+* Client-generated authorization decisions
 
-Track:
+---
 
-• Processing latency
-• Processing failure rate
-• Queue depth
-• Publication failures
-• Rights conflicts
-• Indexing latency
-• Media failures
+# 28. Rate Limiting and Abuse Prevention
 
-Never log sensitive credentials or private content-access tokens.
+Apply appropriate rate limits to mutation-heavy endpoints.
 
-────────────────────────────────────────
+Pay particular attention to:
 
-TESTING
+* Playlist creation
+* Bulk playlist mutations
+* Track likes
+* Saves
+* Follows
+* Collaborator management
+* Reordering
+* Public playlist retrieval if abuse risk exists
 
-UNIT TESTS
+Do not use one arbitrary global rate limit for every endpoint.
+
+Follow existing Redis-based rate-limiting infrastructure.
+
+---
+
+# 29. Privacy
+
+Respect privacy requirements across:
+
+* Private playlists
+* User libraries
+* Follow relationships
+* Collaborator lists
+* User profile data
+* Audit logs
+* Events
+* Caches
+
+Do not expose private library state through:
+
+* Public APIs
+* Search indexes
+* Events
+* Logs
+* Analytics payloads
+* Error responses
+
+Any future search/recommendation integration must receive only data that is authorized and appropriate to expose.
+
+---
+
+# 30. Observability
+
+Instrument important operations.
+
+Capture:
+
+* Request latency
+* Error rates
+* Database latency
+* Redis latency
+* Transaction failures
+* Playlist mutation conflicts
+* Library mutation failures
+* Authorization failures
+* Event/outbox failures
+* Cache hit/miss rates where useful
+
+Use the repository's observability stack.
+
+Logs must contain useful structured context without exposing:
+
+* Passwords
+* Tokens
+* Session secrets
+* Sensitive private library contents
+* Credentials
+* Unnecessary personal data
+
+---
+
+# 31. Testing
+
+Add comprehensive tests.
+
+At minimum include:
+
+## Unit tests
 
 Test:
 
-• Artist permissions
-• Label permissions
-• Release state machine
-• Track validation
-• Rights validation
-• Availability rules
-• Publication rules
-• Localization fallback
-• Processing state
+* Library services
+* Playlist services
+* Authorization policies
+* Permission evaluation
+* Ordering logic
+* Revision/conflict logic
+* Validation
+* Event construction
 
-INTEGRATION TESTS
-
-Test:
-
-• PostgreSQL
-• Prisma
-• Redis
-• Kafka
-• BullMQ
-• S3
-• Search integration
-
-MEDIA TESTS
+## Integration tests
 
 Test:
 
-• Upload
-• Validation
-• Metadata extraction
-• Processing
-• Failure
-• Retry
-• Duplicate processing
+* PostgreSQL persistence
+* Prisma transactions
+* Redis behavior
+* Cache invalidation
+* Outbox behavior
 
-SECURITY TESTS
+## API tests
 
 Test:
 
-• Artist isolation
-• Label isolation
-• Partner isolation
-• IDOR
-• Unauthorized publication
-• Media access
+* Authentication
+* Authorization
+* Validation
+* Pagination
+* Error responses
+* Mutation semantics
 
-CONCURRENCY TESTS
+## Security tests
+
+Explicitly test:
+
+* IDOR
+* Private playlist access
+* Unauthorized playlist mutation
+* Unauthorized collaborator changes
+* Library access between users
+* Permission escalation
+* User enumeration behavior
+
+## Concurrency tests
 
 Test:
 
-• Concurrent publication
-• Concurrent metadata updates
-• Track ordering changes
-• Rights changes
-• Duplicate processing jobs
+* Simultaneous playlist mutations
+* Simultaneous reorder operations
+* Duplicate like requests
+* Duplicate save requests
+* Concurrent collaborator updates
+* Stale revision mutations
 
-PERFORMANCE TESTS
+## Regression tests
 
-Test:
+Ensure existing authentication, user, catalog, and other previously implemented backend functionality remains functional.
 
-• Catalog reads
-• Artist pages
-• Album pages
-• Track retrieval
-• Publication throughput
-• Search indexing
+---
 
-────────────────────────────────────────
+# 32. Performance
 
-DOCUMENTATION
+Review database queries for:
 
-Generate:
+* N+1 behavior
+* Missing indexes
+* Excessive joins
+* Inefficient count operations
+* Large offset pagination
+* Unnecessary payloads
+* Repeated permission queries
 
-• Artist architecture
-• Label architecture
-• Content partner architecture
-• Album/release model
-• Track model
-• Credits
-• Media model
-• Audio processing pipeline
-• Artwork processing
-• Rights architecture
-• Availability
-• Localization
-• Content ingestion
-• Publication workflow
-• API contracts
-• Event contracts
-• Queue architecture
-• Database schema
-• Testing strategy
-• Security model
+Use:
 
-────────────────────────────────────────
+* Proper indexes
+* Cursor pagination
+* Batched queries
+* Prisma transactions
+* Redis caching where justified
 
-PROJECT INDEX
+Do not prematurely optimize without understanding actual access patterns.
 
-Update the backend Project Index with:
+---
 
-• Artist modules
-• Artist-team modules
-• Label modules
-• Partner modules
-• Album modules
-• Release modules
-• Track modules
-• Metadata modules
-• Genre modules
-• Localization modules
-• Artwork modules
-• Audio asset modules
-• Audio rendition modules
-• Rights modules
-• Availability modules
-• Database objects
-• Migrations
-• API endpoints
-• Events
-• Queues
-• Workers
-• Search integration
-• Tests
-• Generated files
-• Remaining work
-• Current milestone
-• Dependencies
+# 33. Documentation
 
-────────────────────────────────────────
+Update backend documentation as necessary.
 
-IMPLEMENTATION MILESTONES
+Document:
 
-BACKEND MILESTONE 21
+* Library API
+* Playlist API
+* Follow API
+* Collaboration permissions
+* Visibility rules
+* Pagination
+* Concurrency/revision behavior
+* Error semantics
+* Events
+* Cache behavior
+* Database migrations
+* Testing procedures
 
-Artists, artist teams, labels, content partners, roles, and permissions.
+Update OpenAPI/Swagger definitions.
 
-BACKEND MILESTONE 22
+Documentation must describe actual implemented behavior.
 
-Albums, releases, tracks, identifiers, credits, genres, tags, and localized metadata.
+Do not document functionality that does not exist.
 
-BACKEND MILESTONE 23
+---
 
-Artwork, audio assets, upload authorization, object-storage integration, and media metadata.
+# 34. Explicitly Deferred Scope
 
-BACKEND MILESTONE 24
+Do NOT implement the following as complete systems in this volume:
 
-Audio processing state, processing jobs, rendition metadata, and media workflows.
+* Audio streaming
+* HLS generation
+* FFmpeg transcoding
+* S3 media processing
+* CloudFront delivery
+* Playback sessions
+* Playback authorization
+* Offline downloads
+* Search
+* Elasticsearch/OpenSearch indexing
+* Recommendation engine
+* Personalized recommendations
+* Subscription billing
+* Stripe/payment integration
+* Advertising
+* Push notifications
+* Full analytics pipeline
+* Artist royalty calculations
+* Full music licensing workflows
+* Social feed
+* Real-time chat
 
-BACKEND MILESTONE 25
+Only create integration boundaries/events if required for the currently implemented domains.
 
-Content ingestion, release submission, moderation integration, publication, and scheduling.
+Do not create fake implementations for deferred systems.
 
-BACKEND MILESTONE 26
+---
 
-Rights management, regional availability, platform restrictions, and rights expiration.
+# 35. Repository Integrity
 
-BACKEND MILESTONE 27
+Before modifying anything:
 
-Search indexing integration, cache invalidation, events, and background workers.
+1. Inspect the repository.
+2. Identify existing implementations.
+3. Determine the correct integration points.
+4. Reuse compatible abstractions.
+5. Make minimal safe changes.
+6. Preserve backward compatibility.
+7. Avoid regenerating unchanged files.
 
-BACKEND MILESTONE 28
+Never create a parallel architecture merely to satisfy this prompt.
 
-Administrative workflows, security hardening, audit integration, and partner isolation.
+---
 
-BACKEND MILESTONE 29
+# 36. Validation
 
-Integration testing, media testing, concurrency testing, and performance testing.
+Before declaring the volume complete:
 
-BACKEND MILESTONE 30
+* Run formatting.
+* Run linting.
+* Run TypeScript compilation/type checking.
+* Run relevant unit tests.
+* Run integration tests where available.
+* Run API tests.
+* Run database migration validation.
+* Verify Prisma schema consistency.
+* Verify OpenAPI generation.
+* Verify Docker/build compatibility where applicable.
+* Verify no secrets were introduced.
+* Verify no TODO/FIXME placeholders were introduced.
+* Verify no pseudo-code remains.
+* Verify existing functionality has not regressed.
 
-Production hardening, reconciliation, observability validation, and Project Index completion.
+Fix discovered problems before completion.
 
-Each milestone should contain approximately 20–40 files where practical.
+Do not report tests as passing unless they actually ran successfully.
 
-Every milestone must compile before proceeding.
+---
 
-────────────────────────────────────────
+# 37. Completion Report
 
-OUTPUT FORMAT
+At the end, provide a factual implementation report containing:
 
-For every generated file provide:
+## Implemented
 
-1. Exact file path
-2. Complete file contents
+List the functionality actually implemented.
 
-Never truncate code.
+## Files Changed
 
-Never summarize source code instead of generating it.
+List files created or modified.
 
-Never generate pseudo-code.
+## Database Changes
 
-Never generate placeholders.
+Describe:
 
-Never generate TODO implementations.
+* Models
+* Relationships
+* Constraints
+* Indexes
+* Migrations
 
-When modifying an existing file:
+## APIs Added or Changed
 
-1. Provide the exact file path.
-2. State why it must change.
-3. Provide the complete updated file.
+List the actual endpoints.
 
-Never regenerate unchanged files.
+## Events
 
-────────────────────────────────────────
+List implemented domain events/outbox changes.
 
-SCOPE RESTRICTION
+## Security
 
-This volume covers only:
+Summarize authorization and security controls.
 
-• Artists
-• Artist teams
-• Labels
-• Content partners
-• Albums
-• Releases
-• Tracks
-• Track versions
-• Credits
-• Genres
-• Tags
-• Languages
-• Localization
-• Artwork
-• Audio assets
-• Audio renditions
-• Content ingestion
-• Publication
-• Rights
-• Availability
-• Search-index integration
-• Related media-processing workflows
+## Tests
 
-Do not implement complete:
+Report the actual commands executed and their real results.
 
-• Playback
-• Playback sessions
-• Playback progress
-• Queue
-• Downloads
-• Offline licenses
-• Playlists
-• Library
-• Search query services
-• Recommendations
-• Radio
-• Charts
-• Podcasts
-• Notifications
-• Advertising
-• Analytics
-• Frontend
-• Mobile
-• Infrastructure
+## Validation
 
-Those belong to later implementation volumes.
+Report actual:
 
-────────────────────────────────────────
+* Type-check result
+* Lint result
+* Test result
+* Build result
+* Migration result
 
-QUALITY BAR
+## Deferred
 
-Treat music catalog, content rights, media processing, and publication as critical platform infrastructure.
+List functionality intentionally left for later volumes.
 
-Assume:
+Never claim something was implemented if it was not actually implemented.
 
-• Millions of tracks
-• Large artist ecosystems
-• Multiple releases per artist
-• Multiple track versions
-• Regional licensing
-• Large media uploads
-• Scheduled releases
-• High catalog-read traffic
-• Large global CDN traffic
+---
 
-Prioritize:
+# 38. Final Engineering Rule
 
-• Content correctness
-• Rights correctness
-• Organization isolation
-• Media integrity
-• Publication integrity
-• Idempotency
-• Auditability
-• Scalability
-• Security
-• Observability
-• Maintainability
-• Production readiness
+The result must be production-grade backend software, not a demonstration.
+
+Every implementation must be:
+
+* Complete
+* Typed
+* Tested
+* Secure
+* Observable
+* Transactionally correct
+* Concurrency-aware
+* Maintainable
+* Scalable
+* Compatible with the existing repository
+* Ready for integration with future playback, search, recommendation, notification, subscription, and analytics systems
+
+Never use:
+
+* Pseudo-code
+* Placeholders
+* TODO comments
+* FIXME comments
+* Fake integrations
+* Fake provider responses
+* Hardcoded secrets
+* Incomplete implementations
+* “Implement similarly”
+* “For brevity”
+* “Remaining code omitted”
+* “Left as an exercise”
+
+Do not stop after creating scaffolding.
+
+Implement the actual functionality required by this volume, validate it, and report the factual repository state.

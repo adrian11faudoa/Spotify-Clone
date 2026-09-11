@@ -1,1478 +1,1333 @@
-You are operating in Senior Engineering Team Mode.
+# Spotify-Style Music Streaming Platform — Backend Prompt — Volume 2
 
-Build the production-ready backend for identity, accounts, profiles, authentication, authorization, sessions, devices, subscriptions, billing, payments, and entitlements for an enterprise-scale global music streaming and audio entertainment platform comparable in architectural scope to Spotify.
+## ROLE
 
-The platform is an original implementation.
+Act as the senior backend engineering team responsible for implementing the production-grade **music catalog and content domain** of an original Spotify-style music streaming platform.
 
-Do not copy proprietary source code, internal architecture, branding, confidential implementation details, proprietary algorithms, or private implementation details from Spotify or any other company.
+Act as:
 
-This prompt is completely independent and may be executed in a separate conversation.
+* Principal Software Architect
+* Staff Backend Engineer
+* Database Architect
+* Domain-Driven Design Engineer
+* Security Engineer
+* Media Platform Engineer
+* QA Engineer
 
-The backend must follow the approved Spotify-like architecture, domain boundaries, service ownership, database architecture, API conventions, security model, event architecture, and Project Index.
+You are not acting as a programming tutor.
 
-Do not redesign the architecture.
+Implement real production-quality functionality in the existing repository.
 
-Do not generate frontend code.
+Do not produce pseudo-code, placeholders, TODOs, FIXME comments, fake APIs, fake provider behavior, incomplete implementations, or merely descriptive answers.
 
-Do not generate mobile code.
+The repository is the source of truth.
 
-Do not generate infrastructure implementation code.
+---
 
-Do not generate Terraform.
+# 1. PROJECT
 
-Do not generate Kubernetes manifests.
+Build the catalog/content backend for an original music streaming platform.
 
-Do not generate CI/CD workflows.
+The platform must support a production-quality catalog containing:
 
-────────────────────────────────────────
+* artists
+* albums
+* tracks
+* genres
+* releases
+* track/artist relationships
+* album/artist relationships
+* artwork references
+* audio-media references
+* catalog availability
+* publishing lifecycle
+* explicit-content metadata
+* identifiers
+* track ordering
+* multi-disc releases
+* catalog administration
 
-MISSION
+The implementation must be original and independent from Spotify's proprietary code, private APIs, or internal architecture.
 
-Implement the production-ready backend domains for:
+---
 
-• Identity
-• Users
-• Accounts
-• Profiles
-• Authentication
-• Authorization
-• Sessions
-• Devices
-• Account security
-• Subscription plans
-• Subscriptions
-• Billing accounts
-• Payment methods
-• Payments
-• Invoices
-• Refunds
-• Entitlements
-• Regional plan availability
-• Subscription lifecycle
-• Payment-provider webhooks
-• Subscription reconciliation
+# 2. TECHNOLOGY
 
-The implementation must support:
+Use the repository's compatible implementation of:
 
-• Hundreds of millions of users
-• Multiple profiles where supported
-• Multiple devices per account
-• Multiple concurrent sessions
-• Free plans
-• Premium plans
-• Family plans
-• Student plans
-• Regional pricing
-• Trials where approved
-• Upgrades
-• Downgrades
-• Cancellations
-• Grace periods
-• Payment failures
-• Renewals
-• Entitlement recovery
+* Node.js
+* NestJS
+* TypeScript
+* PostgreSQL
+* Prisma
+* Redis where useful
+* REST
+* OpenAPI/Swagger
+* BullMQ where asynchronous processing is required
 
-────────────────────────────────────────
+Do not introduce unnecessary technologies.
 
-TECHNOLOGY STACK
+Search infrastructure, media processing, subscriptions, recommendations, playlists, playback, and other later domains should only be implemented here when required as an explicit dependency of catalog functionality.
 
-Backend:
+---
 
-• Node.js
-• NestJS
-• TypeScript
+# 3. REPOSITORY-FIRST REQUIREMENT
 
-Database:
+Before modifying anything:
 
-• PostgreSQL
-• Prisma ORM
+1. Inspect the repository.
+2. Inspect the existing backend.
+3. Inspect NestJS modules.
+4. Inspect Prisma schema and migrations.
+5. Inspect existing User/Identity functionality.
+6. Inspect authorization.
+7. Inspect API conventions.
+8. Inspect media/storage infrastructure.
+9. Inspect Redis/BullMQ infrastructure.
+10. Inspect event/outbox infrastructure.
+11. Inspect tests.
+12. Inspect documentation.
 
-Cache:
+Determine what already exists.
 
-• Redis
+If catalog functionality is partially implemented:
 
-Event Streaming:
+* reuse it
+* complete it
+* migrate it safely
+* do not create duplicate models
+* do not create duplicate controllers
+* do not create parallel catalog services
 
-• Kafka or Redpanda
+The repository's actual implementation takes precedence over assumptions.
 
-Background Jobs:
+---
 
-• BullMQ
+# 4. DOMAIN BOUNDARY
 
-Payments:
+Establish a clear Catalog domain.
 
-• Stripe or approved payment abstraction
+The catalog domain owns:
 
-Notifications:
+* artist metadata
+* album metadata
+* track metadata
+* genre metadata
+* releases
+* catalog relationships
+* publication state
+* content visibility
+* catalog identifiers
+* media references
+* availability metadata
 
-• Firebase Cloud Messaging
-• Apple Push Notification Service
-• Email provider abstraction
+It does not own:
 
-Testing:
+* user authentication
+* playlist ownership
+* user likes
+* playback sessions
+* recommendation ranking
+* payment processing
 
-• Jest
-• Supertest
-• Integration testing tools
+Those belong to other domains.
 
-Observability:
+Catalog may expose contracts consumed by those domains.
 
-• OpenTelemetry
-• Prometheus
-• Grafana
-• Loki
-• Tempo
+---
 
-────────────────────────────────────────
+# 5. CORE DOMAIN MODEL
 
-IMPLEMENTATION RULES
+Implement or safely adapt the following entities.
 
-Never generate pseudo-code.
+## Artist
 
-Never generate placeholders.
+Support appropriate fields such as:
 
-Never generate TODO comments.
+* id
+* name
+* normalized name
+* biography
+* profile artwork reference
+* status
+* verification state where appropriate
+* createdAt
+* updatedAt
+* publishedAt
+* deletedAt where appropriate
 
-Never omit implementations.
+Do not collect unnecessary personal information.
 
-Never say:
+---
 
-- "implement similarly"
-- "left as an exercise"
-- "for brevity"
-- "remaining code omitted"
-
-Every generated file must be complete.
-
-Every generated file must compile.
-
-Never regenerate unchanged files.
-
-Only modify existing files when required.
-
-Use strict TypeScript.
-
-Use dependency injection.
-
-Keep controllers thin.
-
-Keep business logic outside controllers.
-
-Use repositories for persistence.
-
-Use DTOs for external contracts.
-
-Use centralized validation.
-
-Use centralized error handling.
-
-Use structured logging.
-
-Use the existing observability infrastructure.
-
-Use idempotency for security- and payment-sensitive operations.
-
-────────────────────────────────────────
-
-DOMAIN OWNERSHIP
-
-Maintain explicit boundaries between:
-
-Identity
-
-Accounts
-
-Profiles
-
-Authentication
-
-Authorization
-
-Sessions
-
-Devices
-
-Subscriptions
-
-Billing
-
-Payments
-
-Entitlements
-
-Notifications
-
-Audit
-
-Do not combine:
-
-• Payment state with subscription state
-• Subscription state with entitlement state
-• Session state with account state
-• Device state with authentication credentials
-
-────────────────────────────────────────
-
-IDENTITY
-
-Implement:
-
-• User creation
-• User lookup
-• User status
-• Identity lifecycle
-• Account association
-• Account activation
-• Account suspension
-• Account deactivation
-• Account deletion workflow
-
-Support states such as:
-
-• Pending
-• Active
-• Suspended
-• Disabled
-• Deactivated
-• Deleted
-
-Use stable public identifiers.
-
-Do not expose internal database IDs unnecessarily.
-
-────────────────────────────────────────
-
-ACCOUNT
-
-Implement:
-
-• Account creation
-• Account retrieval
-• Account settings
-• Account status
-• Security settings
-• Account recovery
-• Account deletion request
-• Account suspension
-• Account reactivation where permitted
-
-Separate:
-
-• Identity
-• Account
-• Profile
-• Session
-• Device
-• Subscription
-
-Account-level operations must be auditable.
-
-────────────────────────────────────────
-
-PROFILE
-
-Implement:
-
-• Profile creation
-• Profile retrieval
-• Profile update
-• Profile deletion where supported
-• Display name
-• Avatar reference
-• Language preference
-• Content preferences
-• Explicit-content preference
-• Autoplay preference
-• Notification preferences
-
-Support account models containing multiple profiles where the approved architecture allows it.
-
-Profile-specific recommendation and listening state must remain isolated.
-
-────────────────────────────────────────
-
-PROFILE SECURITY
+## Album
 
 Support:
 
-• Profile PIN where appropriate
-• Managed/kids profile boundaries where supported
-• Explicit-content restrictions
-• Search restrictions
-• Playback restrictions
+* id
+* title
+* normalized title
+* album type
+* release date
+* artwork reference
+* status
+* explicit-content metadata where applicable
+* createdAt
+* updatedAt
+* publishedAt
+* deletedAt where appropriate
 
-Restrictions must be enforced server-side.
+Album types may include:
 
-────────────────────────────────────────
+* ALBUM
+* SINGLE
+* EP
+* COMPILATION
 
-AUTHENTICATION
+Use the actual repository-compatible enum structure.
 
-Implement:
+---
 
-• Registration
-• Login
-• Logout
-• Refresh
-• Session creation
-• Session revocation
-• Email verification
-• Password reset
-• Password change
+## Track
 
-Prepare architecture for:
+Support appropriate fields such as:
 
-• OAuth
-• MFA
-• Passkeys
-• Social login providers
+* id
+* title
+* normalized title
+* duration
+* track number
+* disc number
+* album ID where applicable
+* explicit flag
+* status
+* release date/reference
+* ISRC or equivalent identifier where legitimately available
+* artwork override/reference where appropriate
+* audio media reference
+* createdAt
+* updatedAt
+* publishedAt
+* deletedAt where appropriate
 
-Do not implement unsupported providers as fake placeholders.
+Do not store derived streaming data as authoritative catalog metadata unless justified.
 
-────────────────────────────────────────
+---
 
-PASSWORD SECURITY
+## Genre
 
-Implement:
+Support:
 
-• Industry-standard password hashing
-• Password verification
-• Password change
-• Password reset
-• Reset-token expiration
-• Single-use reset tokens
-• Login-attempt protection
-• Account lockout/rate limiting where appropriate
+* id
+* name
+* normalized name
+* description where useful
+* status where appropriate
+* timestamps
 
-Never:
+Prevent duplicate genres through database constraints.
 
-• Store plaintext passwords
-• Log passwords
-• Return password hashes
-• Include passwords in events
+---
 
-────────────────────────────────────────
+# 6. ARTIST RELATIONSHIPS
 
-EMAIL VERIFICATION
+Support tracks involving:
 
-Implement:
+* primary artists
+* featured artists
+* multiple artists
 
-• Verification token generation
-• Token expiration
-• Single-use verification
-• Resend limits
-• Verification state
-• Replay prevention
+Do not store a single artist ID on Track if the product needs many-to-many artist relationships.
 
-Integrate with the established notification abstraction.
+Create an explicit relationship model where appropriate.
 
-────────────────────────────────────────
+Relationship metadata may include:
 
-SESSION MANAGEMENT
-
-Implement:
-
-• Session creation
-• Session retrieval
-• Session listing
-• Session refresh
-• Session expiration
-• Session revocation
-• Logout-all-sessions
-
-Track appropriate metadata:
-
-• Device
-• Platform
-• Application version
-• Created timestamp
-• Last activity
-• Expiration
-• Revocation state
-• Security metadata where appropriate
-
-Do not store unnecessary secrets.
-
-────────────────────────────────────────
-
-DEVICE MANAGEMENT
-
-Implement:
-
-• Device registration
-• Device identification
-• Device platform
-• Application version
-• Capabilities reference
-• Push token association
-• Session association
-• Device revocation
-• Remote logout
-
-Prepare device capabilities needed later for:
-
-• Audio quality
-• Offline downloads
-• DRM/content protection
-• Background playback
-• Maximum supported codec
-
-Do not collect unnecessary device information.
-
-────────────────────────────────────────
-
-DEVICE AUTHORIZATION
-
-Define:
-
-• Device ownership
-• Device registration trust
-• Device revocation
-• Maximum device counts where applicable
-• Active device limits
-• Download device limits
-
-Ensure revoked devices cannot silently continue privileged operations.
-
-────────────────────────────────────────
-
-AUTHORIZATION
-
-Implement RBAC and permission infrastructure.
+* artist
+* track
+* role
+* ordering
 
 Roles may include:
 
-• Listener
-• Premium Listener
-• Family Manager
-• Student Subscriber
-• Artist
-• Artist Staff
-• Label Staff
-• Content Moderator
-• Support Agent
-• Administrator
-• Super Administrator
-• System Service
-
-Implement:
-
-• Guards
-• Permission decorators
-• Policies
-• Resource ownership
-• Account scoping
-• Profile scoping
-• Organization scoping
+* PRIMARY
+* FEATURED
+* REMIXER
+* PRODUCER
 
-────────────────────────────────────────
+Only implement roles actually required by the product.
 
-PROFILE-LEVEL AUTHORIZATION
+---
 
-Ensure profile-specific data is isolated.
+# 7. ALBUM ARTIST RELATIONSHIPS
 
-This includes:
+Support albums with multiple artists where required.
 
-• Listening history
-• Recommendations
-• Playlists where private
-• Likes
-• Saved albums
-• Follow relationships
-• Downloads
-• Preferences
+Define:
 
-One profile must not automatically gain access to another profile's private state.
+* album
+* artist
+* role
+* ordering
 
-────────────────────────────────────────
+Do not assume every album has exactly one artist.
 
-SUBSCRIPTION PLAN DOMAIN
+---
 
-Implement:
+# 8. TRACK/GENRE RELATIONSHIPS
 
-• Plan creation
-• Plan retrieval
-• Plan activation
-• Plan deactivation
-• Regional availability
-• Currency
-• Billing interval
-• Feature definitions
-• Device limits
-• Offline limits
-• Audio-quality limits
-• Family/Student eligibility rules
+Support tracks belonging to multiple genres when appropriate.
 
-Support plan types such as:
+Enforce uniqueness at the database level.
 
-• Free
-• Premium
-• Family
-• Student
+Avoid duplicate associations.
 
-Use configuration rather than hard-coding plan behavior throughout the domain.
+---
 
-────────────────────────────────────────
+# 9. RELEASE MODEL
 
-REGIONAL PLAN AVAILABILITY
+Where the product requires a distinction between an album's conceptual metadata and a specific release/version, implement an explicit Release model.
 
-Support:
+A release may represent:
 
-• Region
-• Currency
-• Local pricing
-• Tax behavior
-• Availability period
-• Plan eligibility
+* release date
+* market/territory
+* format
+* version
+* availability
+* release status
 
-Prevent unavailable plans from being purchased in unsupported regions.
+Do not create a Release entity merely for abstraction if the actual product does not require it.
 
-────────────────────────────────────────
+If the repository already contains a release model, preserve it.
 
-SUBSCRIPTION DOMAIN
+---
 
-Implement:
+# 10. CONTENT LIFECYCLE
 
-• Subscription creation
-• Activation
-• Upgrade
-• Downgrade
-• Renewal
-• Cancellation
-• Expiration
-• Grace period
-• Payment failure
-• Recovery
+Define explicit catalog states.
 
-Subscription states may include:
+Use repository-compatible states such as:
 
-• Trialing
-• Active
-• Past Due
-• Grace Period
-• Canceled
-• Expired
-• Suspended
+* DRAFT
+* PROCESSING
+* PENDING_REVIEW
+* PUBLISHED
+* HIDDEN
+* ARCHIVED
+* REMOVED
 
-Define valid state transitions.
-
-────────────────────────────────────────
-
-SUBSCRIPTION STATE CONSISTENCY
-
-Separate:
-
-• Subscription state
-• Payment state
-• Billing state
-• Entitlement state
-
-Do not assume these states always transition simultaneously.
-
-Define eventual-consistency behavior for delayed provider events.
-
-────────────────────────────────────────
-
-TRIALS
-
-Support trials where the approved plan allows them.
-
-Implement:
-
-• Trial start
-• Trial end
-• Trial eligibility
-• Trial conversion
-• Trial cancellation
-• Trial expiration
-
-Prevent repeated abuse of trial eligibility.
-
-────────────────────────────────────────
-
-UPGRADE AND DOWNGRADE
-
-Implement:
-
-• Immediate upgrade where appropriate
-• Scheduled downgrade where appropriate
-• Proration through the payment provider where supported
-• Entitlement changes
-• Billing-period handling
-
-Never calculate provider-specific financial behavior incorrectly in the core domain.
-
-Use provider abstraction boundaries.
-
-────────────────────────────────────────
-
-CANCELLATION
-
-Support:
-
-• Immediate cancellation where allowed
-• End-of-period cancellation
-• Cancellation reason
-• Cancellation timestamp
-• Entitlement expiration
-
-Do not silently remove entitled access before the configured cancellation period ends.
-
-────────────────────────────────────────
-
-BILLING ACCOUNT
-
-Implement billing-account state separate from the user/account domain.
-
-Support:
-
-• Billing customer reference
-• Billing region
-• Currency
-• Tax metadata
-• Provider references
-• Billing state
-
-Never store unnecessary raw payment information.
-
-────────────────────────────────────────
-
-PAYMENT DOMAIN
-
-Implement a payment abstraction.
-
-Support:
-
-• Payment method reference
-• Payment intent
-• Payment attempt
-• Payment status
-• Payment confirmation
-• Payment failure
-• Refund
-• Payment provider reference
-
-Use provider tokens and references.
-
-────────────────────────────────────────
-
-STRIPE INTEGRATION
-
-Implement the approved Stripe abstraction.
-
-Support:
-
-• Customer creation
-• Payment intent
-• Subscription-related billing where appropriate
-• Payment methods
-• Webhooks
-• Refunds
-• Provider metadata
-
-Do not allow Stripe-specific models to become the core business-domain model.
-
-────────────────────────────────────────
-
-PAYMENT STATE MACHINE
-
-Implement states such as:
-
-• Created
-• Requires Action
-• Processing
-• Succeeded
-• Failed
-• Canceled
-• Refunded
-• Partially Refunded
+Not every entity must use every state.
 
 Define valid transitions.
 
-Never mark payment successful solely from a client request.
+For example:
 
-────────────────────────────────────────
+DRAFT → PROCESSING
+PROCESSING → PENDING_REVIEW
+PENDING_REVIEW → PUBLISHED
+PENDING_REVIEW → HIDDEN
+PUBLISHED → HIDDEN
+PUBLISHED → ARCHIVED
+HIDDEN → PUBLISHED
+ARCHIVED → REMOVED
 
-WEBHOOK PROCESSING
+Do not permit arbitrary state mutation.
 
-Implement secure payment webhook handling.
+All transitions must be validated server-side.
+
+---
+
+# 11. PUBLIC VISIBILITY
+
+Define what catalog content is publicly visible.
+
+At minimum, unpublished content must not be exposed through ordinary consumer APIs.
+
+Prevent:
+
+* draft tracks appearing in search
+* unpublished albums appearing in public endpoints
+* hidden artists appearing as normal public entities
+* removed media remaining playable
+* administrative metadata leaking through consumer responses
+
+Visibility must be enforced server-side.
+
+---
+
+# 12. ARTIST MANAGEMENT
+
+Implement appropriate artist management APIs.
+
+Potential operations:
+
+* create artist
+* update artist
+* retrieve artist
+* list artists
+* publish artist
+* hide artist
+* archive artist
+
+Authorization must distinguish:
+
+* ordinary users
+* authorized artist/content managers
+* administrators
+
+Do not automatically allow every authenticated user to create or modify published catalog content.
+
+---
+
+# 13. ALBUM MANAGEMENT
+
+Implement appropriate APIs for:
+
+* album creation
+* album update
+* album retrieval
+* album listing
+* album publication
+* album hiding
+* album archival
+
+Validate:
+
+* artist relationships
+* album metadata
+* release information
+* artwork references
+* track relationships
+
+Do not permit unauthorized users to modify another organization's catalog.
+
+---
+
+# 14. TRACK MANAGEMENT
+
+Implement appropriate APIs for:
+
+* create track
+* update track
+* retrieve track
+* list tracks
+* publish track
+* hide track
+* archive/remove track
+
+Validate:
+
+* album relationships
+* artists
+* duration
+* track/disc number
+* explicit flag
+* identifiers
+* media references
+* status
+
+Do not expose private processing metadata through public track responses.
+
+---
+
+# 15. GENRE MANAGEMENT
+
+Implement controlled genre operations.
+
+If genres are administrator-managed:
+
+* restrict creation
+* restrict modification
+* prevent deletion when referenced
+* use safe lifecycle behavior
+
+If deletion is necessary, use a controlled migration strategy rather than violating foreign-key relationships.
+
+---
+
+# 16. TRACK ORDERING
+
+For album tracks support:
+
+* disc number
+* track number
+* deterministic ordering
+
+Prevent duplicate ordering within the same disc/release where the business rules require uniqueness.
+
+Define database constraints where practical.
+
+Do not depend solely on application validation.
+
+---
+
+# 17. MULTI-DISC ALBUMS
+
+Support albums containing multiple discs.
+
+Track ordering must be deterministic using appropriate fields such as:
+
+* disc number
+* track number
+* stable identifier
+
+The API should return tracks in canonical order.
+
+---
+
+# 18. METADATA VALIDATION
+
+Validate:
+
+* title length
+* artist name length
+* biography length
+* genre names
+* duration
+* track numbers
+* disc numbers
+* identifiers
+* dates
+* enum values
+* media references
+
+Reject invalid or malicious input.
+
+Do not accept arbitrary unvalidated JSON as catalog metadata.
+
+---
+
+# 19. NORMALIZATION
+
+Implement deterministic normalization for searchable fields such as:
+
+* artist names
+* album titles
+* track titles
+* genre names
+
+Normalization may include:
+
+* trimming
+* Unicode-aware normalization where appropriate
+* case normalization
+
+Do not destroy the original display value.
+
+Store normalized representations separately where useful.
+
+---
+
+# 20. IDENTIFIERS
+
+Where applicable support legitimate music identifiers such as:
+
+* ISRC
+* UPC/EAN
+* catalog identifiers
+
+Do not invent identifiers.
+
+Validate format where reliable validation rules exist.
+
+Define uniqueness according to the business semantics.
+
+---
+
+# 21. ARTWORK REFERENCES
+
+Integrate with the repository's existing media/storage architecture.
+
+The catalog should reference media assets rather than embedding binary files in PostgreSQL.
+
+Support appropriate artwork references for:
+
+* artist
+* album
+* track
+* release
+
+Do not expose private storage credentials.
+
+Do not allow arbitrary object paths from clients to bypass ownership or authorization.
+
+---
+
+# 22. AUDIO MEDIA REFERENCES
+
+Track records may reference processed audio/media assets.
+
+Do not make a track playable merely because an arbitrary S3 key was supplied.
+
+Validate:
+
+* media asset ownership
+* processing state
+* content type
+* availability
+* catalog relationship
+
+The actual audio-processing and adaptive streaming pipeline may be implemented in a dedicated later backend volume.
+
+---
+
+# 23. MEDIA PROCESSING STATE
+
+If the existing repository already supports media processing, integrate with it.
+
+If catalog needs a processing relationship, support explicit states such as:
+
+* NOT_READY
+* QUEUED
+* PROCESSING
+* READY
+* FAILED
+* INVALID
+
+Do not claim audio is streamable until the required processing state is actually complete.
+
+---
+
+# 24. ADMINISTRATION
+
+Implement secure administrative catalog operations.
+
+Administrative users may need to:
+
+* review content
+* publish content
+* hide content
+* archive content
+* remove content
+* inspect processing state
+
+Every privileged operation must:
+
+* authenticate the actor
+* authorize the permission
+* validate the target
+* create an audit record where appropriate
+
+Do not create hidden administrative endpoints.
+
+---
+
+# 25. ARTIST CONTENT PERMISSIONS
+
+If the product supports artist/content-owner accounts, implement ownership boundaries.
+
+An artist/content manager may modify only catalog entities they are authorized to manage.
+
+Prevent IDOR such as:
+
+`PATCH /artists/{anotherArtistId}`
+
+succeeding merely because the caller is authenticated.
+
+Authorization must be based on server-side ownership/permission checks.
+
+---
+
+# 26. SOFT DELETION AND LIFECYCLE
+
+Use soft deletion where historical references require it.
+
+Consider references from:
+
+* playlists
+* likes
+* playback history
+* analytics
+* search indexes
+* recommendations
+
+Deleting a track must not automatically destroy historical playback records.
+
+Define what happens to:
+
+* playlist references
+* library references
+* search documents
+* cached responses
+* recommendations
+
+---
+
+# 27. CATALOG API DESIGN
+
+Use versioned REST APIs.
+
+Potential API structure:
+
+* `/api/v1/artists`
+* `/api/v1/albums`
+* `/api/v1/tracks`
+* `/api/v1/genres`
+
+Use the repository's actual routing conventions when they differ.
 
 Support:
 
-• Signature verification
-• Event persistence
-• Event ID uniqueness
-• Duplicate detection
-• Idempotent processing
-• Retry
-• Failure recording
-• Unknown-event handling
-• Reconciliation
+* retrieval
+* listing
+* filtering where justified
+* sorting
+* pagination
+* state transitions for authorized users
 
-Persist provider event IDs.
+Do not expose internal database structures directly.
 
-Never process unverified webhook payloads.
+---
 
-────────────────────────────────────────
+# 28. PUBLIC CATALOG ENDPOINTS
 
-INVOICES
+Public/consumer endpoints should return only published/visible content.
 
-Implement:
+Potential operations:
 
-• Invoice reference
-• Invoice state
-• Amount
-• Currency
-• Billing period
-• Provider reference
-• Created date
-• Due date where appropriate
-• Paid date
-• Void state
+* artist detail
+* artist albums
+* artist tracks
+* album detail
+* album tracks
+* track detail
+* genre detail
+* genre tracks
 
-Historical invoice data must remain auditable.
+Implement appropriate pagination.
 
-────────────────────────────────────────
+Avoid unrestricted track or album lists.
 
-REFUNDS
+---
 
-Implement:
+# 29. ADMIN CATALOG ENDPOINTS
 
-• Full refund
-• Partial refund
-• Refund reason
-• Refund state
-• Provider reference
-• Refund timestamps
+Administrative endpoints may expose additional lifecycle information.
 
-Prevent duplicate refund effects.
+Separate administrative responses from public responses.
 
-────────────────────────────────────────
+Do not leak:
 
-ENTITLEMENTS
+* internal storage paths
+* processing credentials
+* security metadata
+* private ownership data
+* internal provider responses
 
-Implement an entitlement domain.
+---
 
-Support entitlement decisions for:
+# 30. RESPONSE CONTRACTS
 
-• Streaming
-• Offline downloads
-• Premium audio quality
-• Ad-free experience
-• Family benefits
-• Student benefits
-• Regional content
-• Other subscription features
+Use explicit response DTOs.
 
-Define entitlement sources:
+Public track responses may include:
 
-• Subscription
-• Plan
-• Promotional grant where supported
-• Administrative grant where explicitly authorized
+* ID
+* title
+* duration
+* artists
+* album
+* artwork
+* explicit status
+* availability
 
-────────────────────────────────────────
+They should not include:
 
-ENTITLEMENT STATE
+* database internals
+* raw S3 keys
+* private processing logs
+* secret provider metadata
 
-Support:
+---
 
-• Active
-• Grace
-• Expiring
-• Expired
-• Revoked
+# 31. PAGINATION
 
-Define:
+Use bounded pagination.
 
-• Effective time
-• Expiration
-• Source
-• Subscription reference
-• Region
-• Profile/account scope
+For potentially large collections support cursor pagination where appropriate.
 
-────────────────────────────────────────
+Relevant collections include:
 
-ENTITLEMENT CACHING
-
-Use Redis for low-latency entitlement reads where appropriate.
+* artists
+* albums
+* tracks
+* artist releases
+* album tracks
+* genre tracks
 
 Define:
 
-• Key pattern
-• TTL
-• Invalidation
-• Refresh
-• Failure behavior
+* maximum page size
+* stable ordering
+* cursor validation
+* next cursor
 
-If Redis is unavailable, entitlement evaluation must fall back to authoritative sources where possible.
+Do not allow unbounded queries.
 
-Do not allow stale entitlements to persist beyond configured safety boundaries.
+---
 
-────────────────────────────────────────
+# 32. CACHING
 
-PAYMENT / ENTITLEMENT RECOVERY
+Use Redis only where caching provides a measurable benefit.
 
-Define behavior for:
+Potential cache targets:
 
-• Payment succeeds but webhook is delayed
-• Webhook arrives multiple times
-• Payment provider temporarily unavailable
-• Subscription expires
-• Payment fails during renewal
-• Refund issued
-• Subscription canceled
-• Region changes
+* published artist metadata
+* published album metadata
+* published track metadata
+* genre metadata
 
-Reconciliation must eventually converge subscription and entitlement state.
+Define:
 
-────────────────────────────────────────
+* key format
+* TTL
+* invalidation
+* stale behavior
 
-FAMILY PLANS
+Catalog mutations must invalidate or update affected cache entries.
 
-Design backend boundaries for:
+Never allow stale private/admin content to leak through a public cache.
 
-• Family account
-• Family manager
-• Family members/profiles
-• Shared subscription
-• Profile-specific personalization
-• Device limits
-• Entitlement inheritance
+---
 
-Define who controls:
+# 33. SEARCH INTEGRATION BOUNDARY
 
-• Billing
-• Plan
-• Family membership
-• Payment method
+Do not fully implement the search engine in this volume unless the repository already requires it.
 
-────────────────────────────────────────
+However, catalog mutations must expose clean events/contracts for future indexing.
 
-STUDENT PLANS
+Potential events:
 
-Support architecture for:
+* ArtistCreated
+* ArtistUpdated
+* ArtistPublished
+* ArtistHidden
+* AlbumCreated
+* AlbumUpdated
+* AlbumPublished
+* AlbumHidden
+* TrackCreated
+* TrackUpdated
+* TrackPublished
+* TrackHidden
+* TrackRemoved
 
-• Student eligibility
-• Verification provider abstraction
-• Student plan activation
-• Verification expiration
-• Re-verification
-• Downgrade after eligibility expires
+Use the repository's actual event naming conventions.
 
-Do not hard-code one verification provider into the domain layer.
+Events must be versioned.
 
-────────────────────────────────────────
+---
 
-SUBSCRIPTION EVENTS
+# 34. OUTBOX / EVENT CONSISTENCY
 
-Publish:
+When a catalog mutation must generate an event:
 
-• SubscriptionCreated
-• SubscriptionActivated
-• SubscriptionUpgraded
-• SubscriptionDowngraded
-• SubscriptionRenewed
-• SubscriptionCancellationRequested
-• SubscriptionCanceled
-• SubscriptionExpired
-• SubscriptionGracePeriodStarted
-• PaymentSucceeded
-• PaymentFailed
-• RefundIssued
-• EntitlementGranted
-• EntitlementChanged
-• EntitlementRevoked
-• DeviceRegistered
-• DeviceRevoked
-• SessionCreated
-• SessionRevoked
+Use a transactional strategy so that:
 
-Events must contain only information consumers need.
+* catalog state
+* outbox record
 
-Never include:
+are committed consistently.
 
-• Passwords
-• Access tokens
-• Refresh tokens
-• Raw payment credentials
+Do not create a state change successfully and silently lose the corresponding indexing/event operation.
 
-────────────────────────────────────────
+Consumers must be able to tolerate duplicates.
 
-BACKGROUND JOBS
+---
 
-Implement BullMQ jobs for:
+# 35. EVENT PAYLOADS
 
-• Verification-token cleanup
-• Password-reset cleanup
-• Session cleanup
-• Device cleanup
-• Trial expiration
-• Subscription renewal reconciliation
-• Entitlement expiration
-• Provider reconciliation
-• Invoice synchronization
-• Payment reconciliation
-• Refund reconciliation
+Events should contain safe information such as:
 
-Each job must support:
+* event ID
+* event type
+* version
+* aggregate/entity ID
+* timestamp
+* producer
+* correlation ID
+* trace context where available
+* relevant metadata
 
-• Retry
-• Exponential backoff
-• Timeout
-• Idempotency
-• Dead-letter handling
-• Metrics
-• Structured logs
+Do not place:
 
-────────────────────────────────────────
+* secrets
+* raw credentials
+* private provider tokens
+* unnecessary personal information
 
-DATABASE
+in catalog events.
 
-Implement Prisma models and migrations for the domains covered by this volume.
+---
 
-Include appropriate models such as:
+# 36. CONCURRENCY
 
-• User
-• Account
-• Profile
-• Session
-• Device
-• VerificationToken
-• PasswordResetToken
-• Role
-• Permission
-• RolePermission
-• UserRole
-• ProfileRestriction
-• SubscriptionPlan
-• PlanRegion
-• Subscription
-• SubscriptionChange
-• BillingAccount
-• PaymentMethodReference
-• Payment
-• PaymentAttempt
-• PaymentWebhookEvent
-• Invoice
-• Refund
-• Entitlement
-• EntitlementGrant
-• SubscriptionProviderReference where appropriate
-• Audit/SecurityEvent references where appropriate
+Protect against concurrent modifications.
+
+Examples:
+
+* two users modifying an artist
+* simultaneous album publication
+* simultaneous track ordering changes
+* repeated state transitions
+* duplicate catalog creation requests
 
 Use:
 
-• Primary keys
-• Foreign keys
-• Unique constraints
-• Composite indexes
-• Check constraints
-• Status constraints
-• Effective timestamps
-• Expiration timestamps
+* database constraints
+* transactions
+* optimistic concurrency where appropriate
+* idempotency where necessary
 
-Do not create music catalog tables in this volume.
+Do not rely only on application-level checks.
 
-────────────────────────────────────────
+---
 
-DATABASE TRANSACTIONS
+# 37. IDEMPOTENCY
 
-Use transactions for local consistency such as:
+Mutations that can be retried should be safely repeatable where appropriate.
 
-• User/account creation
-• Session creation where appropriate
-• Role assignment
-• Subscription state transitions
-• Entitlement persistence
-• Payment record creation
-• Refund record creation
-• Webhook-event persistence
+Consider:
 
-Do not use distributed transactions with external payment providers.
+* content creation
+* media association
+* publication
+* processing-trigger requests
+* event handling
 
-Use:
+Do not create duplicate records because an HTTP request was retried.
 
-• Idempotency
-• Outbox events
-• Reconciliation
-• Provider references
+---
 
-────────────────────────────────────────
+# 38. DATABASE CONSTRAINTS
 
-API
+Use PostgreSQL constraints for important invariants.
 
-Implement production-ready REST APIs.
+Examples:
 
-AUTHENTICATION
+* unique normalized genre names
+* unique identifiers where required
+* unique track/genre relationships
+* unique album/artist relationships
+* unique track/artist relationships
+* valid foreign keys
+* valid ordering constraints where practical
 
-• Register
-• Login
-• Logout
-• Refresh
-• Verify
-• Password reset
-• Password change
+Application validation remains necessary, but database constraints must protect authoritative state.
 
-ACCOUNT
+---
 
-• Get account
-• Update account
-• Account security
+# 39. TRANSACTIONS
 
-PROFILE
+Use transactions for multi-record mutations requiring atomicity.
 
-• Create profile
-• List profiles
-• Get profile
-• Update profile
-• Delete profile where supported
+Examples:
 
-SESSIONS
+* album + artist relationships
+* track + artist relationships
+* track + genre relationships
+* publication state changes with outbox records
+* deletion/archive operations with dependent state updates
 
-• List sessions
-• Revoke session
-• Revoke all sessions
+Do not perform long-running external API calls inside transactions.
 
-DEVICES
+---
 
-• Register device
-• List devices
-• Revoke device
+# 40. SECURITY
 
-SUBSCRIPTIONS
+Protect catalog APIs against:
 
-• List plans
-• Get plan
-• Create subscription
-• Get subscription
-• Change plan
-• Cancel subscription
-• Resume where supported
+* IDOR
+* unauthorized publication
+* unauthorized modification
+* privilege escalation
+* injection
+* malicious metadata
+* oversized payloads
+* enumeration
+* rate-limit bypass
 
-BILLING
+Never trust:
 
-• Get billing account
-• List invoices
-• Get invoice
-• List payment methods where supported
+* client-provided ownership
+* client-provided publication status
+* client-provided authorization roles
+* client-provided media readiness
 
-PAYMENTS
+---
 
-• Create payment intent
-• Get payment state
-• Payment history
+# 41. RATE LIMITING
 
-ENTITLEMENTS
+Apply appropriate rate limits to:
 
-• Get current entitlements
+* public catalog APIs
+* catalog search-like listing operations
+* administrative mutations
+* publication operations
+* media-association operations
 
-ADMINISTRATION
+Use Redis-backed distributed rate limiting if required by the deployment model.
 
-• Manage plans
-• Manage plan regions
-• Manage subscription state with appropriate permissions
-• Inspect payments
-• Inspect entitlements
-• Reconcile provider state
+Avoid making public read APIs unusably restrictive.
 
-Every endpoint must implement:
+---
 
-• Authentication
-• Authorization
-• DTO validation
-• Rate limiting
-• OpenAPI documentation
-• Consistent error responses
-• Idempotency where appropriate
+# 42. AUDITING
 
-────────────────────────────────────────
+Audit important administrative/content-management operations.
 
-SECURITY
+Record:
 
-Protect against:
+* actor
+* action
+* entity
+* timestamp
+* request ID
+* correlation ID
+* safe metadata
 
-• Account takeover
-• Credential stuffing
-• Session theft
-• Token replay
-• Subscription abuse
-• Trial abuse
-• Payment abuse
-• Refund abuse
-• Privilege escalation
-• Unauthorized entitlement access
-• Seller/artist/admin data leakage
+Potential audited actions:
 
-Implement:
+* artist publication
+* album publication
+* track publication
+* content hiding
+* archival
+* removal
+* ownership changes
+* metadata changes by privileged users
 
-• Rate limiting
-• Strong authentication
-• Secure session management
-• Resource ownership
-• RBAC
-• Provider webhook verification
-• Audit logging
+Do not log secrets or unnecessary private data.
 
-────────────────────────────────────────
+---
 
-PRIVACY
+# 43. TESTING
 
-Minimize sensitive data.
+Implement meaningful tests.
 
-Protect:
-
-• Account information
-• Billing information
-• Payment references
-• Device information
-• Security events
-• Profile restrictions
-
-Do not expose billing or security information to unauthorized profiles or users.
-
-────────────────────────────────────────
-
-OBSERVABILITY
-
-Instrument:
-
-• Registration
-• Login
-• Authentication failures
-• Session creation/revocation
-• Device operations
-• Subscription changes
-• Payment operations
-• Webhook processing
-• Entitlement evaluation
-• Reconciliation
-• Administrative subscription changes
-
-Track:
-
-• Login failure rate
-• Authentication latency
-• Subscription conversion
-• Renewal success
-• Payment failure rate
-• Entitlement latency
-• Webhook processing latency
-• Reconciliation mismatches
-
-Never log:
-
-• Passwords
-• Tokens
-• Payment credentials
-• Secrets
-
-────────────────────────────────────────
-
-TESTING
-
-UNIT TESTS
+## Artist
 
 Test:
 
-• Authentication rules
-• Password policies
-• Session state
-• Device policies
-• Authorization
-• Subscription state machine
-• Plan eligibility
-• Trial eligibility
-• Entitlement calculation
-• Refund rules
+* creation
+* retrieval
+* update
+* authorization
+* publication
+* hiding
+* duplicate handling
 
-INTEGRATION TESTS
+## Album
 
 Test:
 
-• PostgreSQL
-• Prisma
-• Redis
-• Kafka
-• BullMQ
-• Stripe abstraction
+* creation
+* artist relationships
+* retrieval
+* track association
+* ordering
+* publication
+* authorization
 
-WEBHOOK TESTS
-
-Test:
-
-• Signature verification
-• Duplicate events
-• Delayed events
-• Out-of-order events
-• Retry
-• Unknown event types
-• Malformed payloads
-
-SECURITY TESTS
+## Track
 
 Test:
 
-• Account takeover
-• Session invalidation
-• Token replay
-• IDOR
-• Privilege escalation
-• Subscription manipulation
-• Entitlement bypass
+* creation
+* artist relationships
+* album association
+* genres
+* duration validation
+* identifiers
+* publication
+* visibility
 
-CONCURRENCY TESTS
-
-Test:
-
-• Concurrent subscription changes
-• Duplicate payment requests
-• Duplicate webhook delivery
-• Concurrent cancellation
-• Concurrent renewal processing
-
-FINANCIAL TESTS
+## Genres
 
 Test:
 
-• Payment success
-• Payment failure
-• Refund
-• Partial refund
-• Subscription renewal
-• Provider reconciliation
+* creation
+* duplicate prevention
+* relationships
+* authorization
 
-PERFORMANCE TESTS
+---
+
+# 44. SECURITY TESTS
+
+Explicitly test:
+
+* ordinary user cannot publish catalog content without permission
+* user cannot modify another artist's content
+* user cannot access unpublished content through public APIs
+* hidden content is not exposed
+* removed content cannot be accessed as normal published content
+* raw storage paths are not exposed unnecessarily
+* invalid IDs cannot bypass authorization
+* admin endpoints reject ordinary users
+* malformed metadata is rejected
+* oversized requests are rejected
+
+---
+
+# 45. API TESTS
 
 Test:
 
-• Login
-• Subscription lookup
-• Entitlement lookup
-• Payment webhook throughput
-• Session operations
+* authentication
+* authorization
+* validation
+* status transitions
+* pagination
+* filtering
+* errors
+* response DTOs
+* cache behavior where implemented
 
-────────────────────────────────────────
+Verify actual HTTP behavior rather than testing only internal services.
 
-DOCUMENTATION
+---
 
-Generate:
+# 46. MIGRATIONS
 
-• Identity architecture
-• Authentication flows
-• Session lifecycle
-• Device lifecycle
-• Authorization model
-• Profile model
-• Subscription plans
-• Subscription lifecycle
-• Billing architecture
-• Payment architecture
-• Webhook processing
-• Entitlement model
-• Family-plan architecture
-• Student-plan architecture
-• Regional plan architecture
-• Reconciliation
-• API contracts
-• Database schema
-• Event contracts
-• Queue architecture
-• Testing strategy
-• Security model
+Create safe Prisma migrations.
 
-────────────────────────────────────────
+Validate:
 
-PROJECT INDEX
+* clean database setup
+* migration against existing repository state
+* constraints
+* indexes
+* relationships
+* enum changes
+* data preservation
 
-Update the backend Project Index with:
+Never reset the production database.
 
-• Identity modules
-• Account modules
-• Profile modules
-• Authentication
-• Authorization
-• Session modules
-• Device modules
-• Subscription modules
-• Billing modules
-• Payment modules
-• Invoice modules
-• Refund modules
-• Entitlement modules
-• Database objects
-• Migrations
-• API endpoints
-• Webhooks
-• Events
-• Queues
-• Workers
-• Tests
-• Generated files
-• Remaining work
-• Current milestone
-• Dependencies
+Never silently delete existing catalog data.
 
-────────────────────────────────────────
+If existing schema conflicts with the desired model, migrate deliberately.
 
-IMPLEMENTATION MILESTONES
+---
 
-BACKEND MILESTONE 11
+# 47. DOCUMENTATION
 
-Identity, users, accounts, profiles, and database models.
+Update documentation for:
 
-BACKEND MILESTONE 12
+* catalog domain
+* API endpoints
+* catalog lifecycle
+* permissions
+* database model
+* media relationships
+* event contracts
+* development setup
+* testing
 
-Authentication, password handling, email verification, sessions, and device management.
+Documentation must describe actual implementation.
 
-BACKEND MILESTONE 13
+---
 
-Authorization, RBAC, permissions, profile restrictions, and security hardening.
+# 48. PERFORMANCE
 
-BACKEND MILESTONE 14
+Avoid:
 
-Subscription plans, regional availability, pricing metadata, and trial eligibility.
+* N+1 artist queries
+* N+1 album queries
+* N+1 track queries
+* unbounded catalog queries
+* expensive relationship loading
+* unnecessary serialization
 
-BACKEND MILESTONE 15
+Use appropriate:
 
-Subscriptions, lifecycle transitions, upgrades, downgrades, cancellation, and grace periods.
+* indexes
+* joins/includes
+* pagination
+* caching
 
-BACKEND MILESTONE 16
+Measure queries where necessary.
 
-Billing accounts, payment methods, payment intents, payment persistence, and secure provider integration.
+---
 
-BACKEND MILESTONE 17
+# 49. FUTURE DOMAIN COMPATIBILITY
 
-Webhooks, invoices, refunds, reconciliation, and provider-state synchronization.
+The catalog implementation must integrate cleanly with future:
 
-BACKEND MILESTONE 18
+* playlist
+* library
+* playback
+* media
+* search
+* recommendation
+* subscription
+* analytics
 
-Entitlements, entitlement caching, family/student boundaries, and entitlement recovery.
+Do not redesign those domains here.
 
-BACKEND MILESTONE 19
+Expose stable domain/API/event contracts.
 
-Events, background jobs, notifications integration, observability, and administrative operations.
+---
 
-BACKEND MILESTONE 20
+# 50. DO NOT IMPLEMENT HERE
 
-Integration testing, concurrency testing, security testing, financial testing, performance testing, and production hardening.
+Do not fully implement:
 
-Each milestone should contain approximately 20–40 files where practical.
+* user playlists
+* liked music
+* playback sessions
+* playback queue
+* playback engine
+* HLS delivery
+* audio transcoding pipeline
+* search engine implementation
+* recommendation engine
+* subscription billing
+* notification system
+* analytics platform
 
-Every milestone must compile before proceeding.
+Only implement the boundaries necessary for clean integration.
 
-────────────────────────────────────────
+---
 
-OUTPUT FORMAT
+# 51. PROHIBITED IMPLEMENTATION
 
-For every generated file provide:
+Never:
 
-1. Exact file path
-2. Complete file contents
+* create fake music provider integrations
+* invent external catalog APIs
+* fabricate licensing information
+* claim legal music rights
+* use copyrighted music as production seed data
+* hardcode fake production credentials
+* expose private S3 credentials
+* allow arbitrary S3 object access
+* use client-controlled publication state
+* create unrestricted admin access
+* bypass authorization for convenience
+* create TODO implementations
+* create placeholder services
+* weaken security for tests
 
-Never truncate code.
+If seed data is needed for development, make it clearly development/test data and keep it separate from production behavior.
 
-Never summarize source code instead of generating it.
+---
 
-Never generate pseudo-code.
+# 52. VALIDATION
 
-Never generate placeholders.
+Before finishing:
 
-Never generate TODO implementations.
+Run the actual applicable repository commands for:
 
-When modifying an existing file:
+* lint
+* formatting
+* TypeScript
+* Prisma validation
+* migrations
+* unit tests
+* integration tests
+* API tests
+* build
 
-1. Provide the exact file path.
-2. State why it must change.
-3. Provide the complete updated file.
+Inspect the final diff.
 
-Never regenerate unchanged files.
+Verify:
 
-────────────────────────────────────────
+* no secrets
+* no duplicate models
+* no duplicate controllers
+* no unrelated modifications
+* no broken existing APIs
+* no invalid migrations
+* no failing relevant tests
 
-SCOPE RESTRICTION
+---
 
-This volume covers only:
+# 53. COMPLETION REPORT
 
-• Identity
-• Accounts
-• Profiles
-• Authentication
-• Authorization
-• Sessions
-• Devices
-• Subscription plans
-• Subscriptions
-• Billing
-• Payments
-• Invoices
-• Refunds
-• Entitlements
-• Family-plan boundaries
-• Student-plan boundaries
-• Regional plan availability
-• Payment webhooks
-• Reconciliation
+Provide a factual report containing:
 
-Do not implement complete:
+## Repository Audit
 
-• Artists
-• Albums
-• Tracks
-• Releases
-• Audio assets
-• Audio processing
-• Rights
-• Availability
-• Playback
-• Downloads
-• Playlists
-• Library
-• Search
-• Recommendations
-• Radio
-• Charts
-• Podcasts
-• Notifications
-• Advertising
-• Analytics
-• Moderation
-• Administration UI
-• Infrastructure
+What catalog-related functionality already existed.
 
-Those belong to later backend implementation volumes.
+## Implemented
 
-────────────────────────────────────────
+Actual:
 
-QUALITY BAR
+* modules
+* entities
+* migrations
+* APIs
+* authorization
+* events
+* caching
+* tests
+* documentation
 
-Treat identity, subscriptions, payments, and entitlements as mission-critical backend infrastructure.
+## Validation
 
-Assume:
+Actual commands executed and their results.
 
-• Hundreds of millions of users
-• Large concurrent login volume
-• Millions of subscription records
-• High payment traffic
-• High webhook volume
-• Multiple devices per account
-• Multiple profiles
-• Regional plans
-• Strict security requirements
-• Strict privacy requirements
-• Global deployment
+## Deferred
 
-Prioritize:
+Catalog-adjacent functionality intentionally reserved for later volumes.
 
-• Authentication security
-• Authorization correctness
-• Subscription correctness
-• Payment idempotency
-• Entitlement accuracy
-• Auditability
-• Reconciliation
-• Scalability
-• Observability
-• Fault tolerance
-• Maintainability
-• Production readiness
+## External Configuration
+
+Any genuinely required external configuration.
+
+## Known Issues
+
+Actual limitations or unresolved issues.
+
+Do not claim production readiness unless the repository evidence supports it.
+
+---
+
+# 54. STANDALONE REQUIREMENT
+
+This prompt is fully standalone.
+
+It must not require:
+
+* another prompt
+* a previous architecture response
+* a previously approved design
+* hidden conversation context
+
+The repository is the source of truth.
+
+Inspect actual repository state before implementing.
+
+---
+
+# FINAL OBJECTIVE
+
+Leave the repository with a secure, maintainable, production-quality music catalog backend supporting:
+
+* artists
+* albums
+* tracks
+* genres
+* releases where justified
+* artist relationships
+* album relationships
+* track relationships
+* metadata
+* identifiers
+* artwork references
+* audio-media references
+* catalog lifecycle
+* publication
+* visibility
+* authorization
+* administrative management
+* auditability
+* cache behavior where justified
+* event contracts
+* database integrity
+* comprehensive tests
+
+The implementation must provide a solid authoritative catalog foundation for the later playlist, playback, media streaming, search, recommendation, subscription, analytics, and notification systems.
